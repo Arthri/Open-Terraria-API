@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright (C) 2020 DeathCradle
 
 This file is part of Open Terraria API v3 (OTAPI)
@@ -70,7 +70,7 @@ public static partial class Common
             if (!File.Exists(savePath))
             {
                 using var client = new HttpClient();
-                var data = client.GetByteArrayAsync(url).Result;
+                var data = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
                 File.WriteAllBytes(savePath, data);
             }
 
