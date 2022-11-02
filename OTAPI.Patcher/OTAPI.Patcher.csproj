@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -23,35 +23,23 @@
 		<ProjectReference Include="..\FNA\FNA.Core.csproj" />
 		<ProjectReference Include="..\OTAPI.Common\OTAPI.Common.csproj" />
 	</ItemGroup>
+	<PropertyGroup>
+		<OTAPIScriptsDirectory>$(MSBuildThisProjectDirectory)..\OTAPI.Scripts\</OTAPIScriptsDirectory>
+	</PropertyGroup>
 	<ItemGroup>
-		<Refs Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\*.refs" />
-		<Patches Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\Patches\**\*.cs" />
-		<TopLevelScripts Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\Mods\**\*.cs" />
-		<Shims Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\Shims\**\*.cs" />
-		<JavaScript Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\JavaScript\**\*.js" />
-		<Lua Include="$(MSBuildProjectDirectory)\..\OTAPI.Scripts\Lua\**\*.lua" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)*.refs" TargetPath="csharp/plugins/%(Filename)%(Extension)" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)Patches\**\*.cs" TargetPath="csharp/plugins/patches/terraria/%(RecursiveDir)%(Filename)%(Extension)" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)Mods\**\*.cs" TargetPath="csharp/plugins/mods/terraria/%(RecursiveDir)%(Filename)%(Extension)" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)Shims\**\*.cs" TargetPath="csharp/plugins/shims/terraria/%(RecursiveDir)%(Filename)%(Extension)" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)JavaScript\**\*.js" TargetPath="clearscript/%(RecursiveDir)%(Filename)%(Extension)" />
+		<None CopyToOutputDirectory="PreserveNewest" Include="$(OTAPIScriptsDirectory)Lua\**\*.lua" TargetPath="lua/%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+
+	<Target Name="_DeleteMods" BeforeTargets="PrepareForBuild">
+		<RemoveDir Directories="$(TargetDir)modifications\;$(TargetDir)csharp\;$(TargetDir)clearscript\;$(TargetDir)lua\" />
+	</Target>
+
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<MakeDir Directories="$(TargetDir)modifications\" />
-		<RemoveDir Directories="$(TargetDir)modifications\" />
-		<MakeDir Directories="$(TargetDir)modifications\" />
-		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.CSharp.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
-		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.ClearScript.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
-		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.Lua.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
-		<MakeDir Directories="$(TargetDir)csharp\" />
-		<RemoveDir Directories="$(TargetDir)csharp\plugins\" />
-		<MakeDir Directories="$(TargetDir)csharp\plugins\" />
-		<Copy SourceFiles="@(Refs)" DestinationFolder="$(TargetDir)csharp/plugins/" />
-		<Copy SourceFiles="@(Patches)" DestinationFolder="$(TargetDir)csharp/plugins/patches/terraria/%(RecursiveDir)" />
-		<Copy SourceFiles="@(TopLevelScripts)" DestinationFolder="$(TargetDir)csharp/plugins/mods/terraria/%(RecursiveDir)" />
-		<Copy SourceFiles="@(Shims)" DestinationFolder="$(TargetDir)csharp/plugins/shims/terraria/%(RecursiveDir)" />
-		<MakeDir Directories="$(TargetDir)clearscript\" />
-		<RemoveDir Directories="$(TargetDir)clearscript\" />
-		<MakeDir Directories="$(TargetDir)clearscript\" />
-		<Copy SourceFiles="@(JavaScript)" DestinationFolder="$(TargetDir)clearscript/%(RecursiveDir)" />
-		<MakeDir Directories="$(TargetDir)lua\" />
-		<RemoveDir Directories="$(TargetDir)lua\" />
-		<MakeDir Directories="$(TargetDir)lua\" />
-		<Copy SourceFiles="@(Lua)" DestinationFolder="$(TargetDir)lua/%(RecursiveDir)" />
+		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.CSharp.dll;$(TargetDir)ModFramework.Modules.ClearScript.dll;$(TargetDir)ModFramework.Modules.Lua.dll" DestinationFolder="$(TargetDir)modifications" />
 	</Target>
 </Project>
