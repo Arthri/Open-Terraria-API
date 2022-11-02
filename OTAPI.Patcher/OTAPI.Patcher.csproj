@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -53,8 +53,5 @@
 		<RemoveDir Directories="$(TargetDir)lua\" />
 		<MakeDir Directories="$(TargetDir)lua\" />
 		<Copy SourceFiles="@(Lua)" DestinationFolder="$(TargetDir)lua/%(RecursiveDir)" />
-	</Target>
-	<Target Name="CleanAll" AfterTargets="Clean">
-		<RemoveDir Directories="$(OUTDIR)" />
 	</Target>
 </Project>
