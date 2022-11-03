@@ -110,7 +110,15 @@ public static partial class Common
         if (!info.Exists || info.GetDirectories().Length == 0)
         {
             info.Create();
-            ZipFile.ExtractToDirectory(zipPath, directory);
+            try
+            {
+                ZipFile.ExtractToDirectory(zipPath, directory);
+            }
+            catch
+            {
+                Directory.Delete(directory);
+                throw;
+            }
         }
 
         return directory;
