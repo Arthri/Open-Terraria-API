@@ -1,16 +1,12 @@
-# This is a basic workflow to help you get started with Actions
-
 name: "CI-NuGet"
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push/pull events but only for the upcoming-nuget-release branch
   push:
     branches: [ upcoming-nuget-release ]
-    
+
 jobs:
 
-  PCServer:
+  Server:
     runs-on: ubuntu-latest
     environment: NuGet
 
@@ -22,22 +18,16 @@ jobs:
             name: PC,
             patch_target: p,
             package_path: OTAPI.PC.nupkg,
-            binaries_path: artifact-pc,
-            wiki_md_file: OTAPI.PC.Server.mfw.md,
           },
           {
             name: Mobile,
             patch_target: m,
             package_path: OTAPI.Mobile.nupkg,
-            binaries_path: artifact-mobile,
-            wiki_md_file: OTAPI.Mobile.Server.mfw.md,
           },
           {
-            name: tML,
+            name: tModLoader,
             patch_target: t,
             package_path: OTAPI.TML.nupkg,
-            binaries_path: artifact-tml,
-            wiki_md_file: OTAPI.TML.PC.Server.mfw.md,
           },
         ]
 
