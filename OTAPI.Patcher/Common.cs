@@ -65,10 +65,12 @@ public static partial class Common
         string filename = Path.GetFileName(uri.AbsolutePath);
         if (!String.IsNullOrWhiteSpace(filename))
         {
-            var savePath = Path.Combine(Environment.CurrentDirectory, filename);
+            var saveDir = Path.Combine(Path.GetTempPath(), "OTAPI", "Patcher");
+            var savePath = Path.Combine(saveDir, filename);
 
             if (!File.Exists(savePath))
             {
+                Directory.CreateDirectory(saveDir);
                 using var client = new HttpClient();
                 var data = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
                 File.WriteAllBytes(savePath, data);
