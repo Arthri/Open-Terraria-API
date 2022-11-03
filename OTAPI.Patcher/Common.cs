@@ -72,8 +72,24 @@ public static partial class Common
             {
                 Directory.CreateDirectory(saveDir);
                 using var client = new HttpClient();
-                var data = client.GetByteArrayAsync(url).GetAwaiter().GetResult();
-                File.WriteAllBytes(savePath, data);
+                using var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                try
+                {
+                    using var data = client.GetStreamAsync(url).GetAwaiter().GetResult();
+                    data.CopyTo(fileStream);
+                }
+                catch
+                {
+                    try
+                    {
+                        File.Delete(savePath);
+                    }
+                    catch
+                    {
+                    }
+
+                    throw;
+                }
             }
 
             return savePath;
