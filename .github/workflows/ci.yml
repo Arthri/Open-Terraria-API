@@ -34,7 +34,7 @@ jobs:
             package_path: OTAPI.Mobile.nupkg,
           },
           {
-            name: tML,
+            name: tModLoader,
             patch_target: t,
             package_path: OTAPI.TML.nupkg,
           },
