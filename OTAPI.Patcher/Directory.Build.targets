@@ -1,0 +1,20 @@
+<Project ToolsVersion="15.0" TreatAsLocalProperty="_DirectoryBuildTargetsFile" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Load higher Directory.Build.targets if it exists -->
+  <PropertyGroup>
+    <_DirectoryBuildTargetsFile>$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../'))</_DirectoryBuildTargetsFile>
+  </PropertyGroup>
+
+  <Import Condition="Exists($(_DirectoryBuildTargetsFile))" Project="$(_DirectoryBuildTargetsFile)" />
+
+
+
+  <!--
+    ModFramework resolves from the working directory, so
+    set working directory to bin to let it resolve properly
+  -->
+  <PropertyGroup>
+    <RunWorkingDirectory>$(TargetDir)</RunWorkingDirectory>
+  </PropertyGroup>
+
+</Project>
