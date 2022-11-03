@@ -27,22 +27,16 @@ jobs:
             name: PC,
             patch_target: p,
             package_path: OTAPI.PC.nupkg,
-            binaries_path: artifact-pc,
-            wiki_md_file: OTAPI.PC.Server.mfw.md,
           },
           {
             name: Mobile,
             patch_target: m,
             package_path: OTAPI.Mobile.nupkg,
-            binaries_path: artifact-mobile,
-            wiki_md_file: OTAPI.Mobile.Server.mfw.md,
           },
           {
             name: tML,
             patch_target: t,
             package_path: OTAPI.TML.nupkg,
-            binaries_path: artifact-tml,
-            wiki_md_file: OTAPI.TML.PC.Server.mfw.md,
           },
         ]
 
@@ -67,11 +61,9 @@ jobs:
         with:
           name: ${{ matrix.profile.name }} Binaries
           path: |
-            OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.binaries_path }}/COPYING.txt
-            OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.binaries_path }}/OTAPI.dll
-            OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.binaries_path }}/OTAPI.Runtime.dll
+            OTAPI.Patcher/bin/Debug/net6.0/artifact-*/*
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.profile.name }} Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.wiki_md_file }}
+          path: OTAPI.Patcher/bin/Debug/net6.0/*.mfw.md
