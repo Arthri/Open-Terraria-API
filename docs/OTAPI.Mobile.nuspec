@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>OTAPI.Upcoming.Mobile</id>
+    <id>MODEFDP.OTAPI.Upcoming.Mobile</id>
     <title>Open Terraria API for Terraria</title>
     <version>[INJECT_VERSION]</version>
     <authors>DeathCradle</authors>
