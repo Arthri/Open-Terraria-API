@@ -4,8 +4,8 @@
     <id>MODEFDP.OTAPI.Upcoming.tModLoader</id>
     <title>Open Terraria API for Terraria</title>
     <version>[INJECT_VERSION]</version>
-    <authors>DeathCradle</authors>
-    <owners>DeathCradle</owners>
+    <authors>DeathCradle, Arthri</authors>
+    <owners>Arthri</owners>
     <license type="file">COPYING.txt</license>
     <projectUrl>https://github.com/Arthri/Open-Terraria-API/tree/upcoming</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
