@@ -22,6 +22,8 @@ using ModFramework;
 using ModFramework.Relinker;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System;
 using Terraria;
 
 /// <summary>
@@ -32,20 +34,35 @@ using Terraria;
 void ThreadSafeProperties(ModFwModder modder)
 {
     var f_netMode = modder.GetFieldDefinition(() => Main.netMode);
-    RemapAsThreadSafeProperty(f_netMode, modder);
-    f_netMode.Constant = 2;
+    RemapAsThreadSafeProperty(f_netMode, modder, 2);
 
     var f_myPlayer = modder.GetFieldDefinition(() => Main.myPlayer);
-    f_myPlayer.Constant = 255;
-    RemapAsThreadSafeProperty(f_myPlayer, modder);
+    RemapAsThreadSafeProperty(f_myPlayer, modder, 255);
 }
 
-static PropertyDefinition RemapAsThreadSafeProperty(FieldDefinition field, ModFwModder modder)
+static PropertyDefinition RemapAsThreadSafeProperty(FieldDefinition field, ModFwModder modder, int constant)
 {
-    var getter = GenerateThreadSafeGetter(field);
+    // Add a new field which indicates if the specified field has been initialized yet
+    var f_Initialized = new FieldDefinition(
+        $"<{field.Name}>k__Initialized",
+        FieldAttributes.Private
+        ,
+        field.Module.TypeSystem.Boolean
+    )
+    {
+        CustomAttributes =
+        {
+            CreateCompilerGeneratedAttribute(field),
+            CreateThreadStaticAttribute(field),
+        },
+        IsStatic = field.IsStatic,
+    };
+    field.DeclaringType.Fields.Add(f_Initialized);
+
+    var getter = CreateGetter(field, constant, f_Initialized);
     field.DeclaringType.Methods.Add(getter);
 
-    var setter = GenerateThreadSafeSetter(field);
+    var setter = CreateSetter(field, f_Initialized);
     field.DeclaringType.Methods.Add(setter);
 
     var property = new PropertyDefinition(field.Name, PropertyAttributes.None, field.FieldType)
@@ -55,18 +72,21 @@ static PropertyDefinition RemapAsThreadSafeProperty(FieldDefinition field, ModFw
         SetMethod = setter,
     };
 
-    var threadStaticAttribute = field.DeclaringType.Module.GetCoreLibMethod("System", "ThreadStaticAttribute", ".ctor");
-    threadStaticAttribute.HasThis = true;
-    field.CustomAttributes.Add(new CustomAttribute(threadStaticAttribute));
     field.CustomAttributes.Add(CreateCompilerGeneratedAttribute(field));
+    field.CustomAttributes.Add(CreateThreadStaticAttribute(field));
     field.DeclaringType.Properties.Add(property);
-
-    modder.AddTask<FieldToPropertyRelinker>(field, property);
-
     field.Name = $"<{field.Name}>k__BackingField";
     field.IsPrivate = true;
+    modder.AddTask<FieldToPropertyRelinker>(field, property);
 
     return property;
+}
+
+static CustomAttribute CreateThreadStaticAttribute(IMemberDefinition member)
+{
+    var attr = member.DeclaringType.Module.GetCoreLibMethod("System", "ThreadStaticAttribute", ".ctor");
+    attr.HasThis = true;
+    return new(attr);
 }
 
 static CustomAttribute CreateCompilerGeneratedAttribute(IMemberDefinition member)
@@ -76,9 +96,60 @@ static CustomAttribute CreateCompilerGeneratedAttribute(IMemberDefinition member
     return new(attr);
 }
 
-static MethodDefinition GenerateThreadSafeGetter(FieldDefinition field)
+static void Emit_ld(ILCursor cursor, FieldDefinition field)
 {
-    MethodDefinition method = new("get_" + field.Name, MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, field.FieldType)
+    if (field.IsStatic)
+    {
+        cursor.Emit(OpCodes.Ldsfld, field);
+    }
+    else
+    {
+        cursor.Emit(OpCodes.Ldarg_0);
+        cursor.Emit(OpCodes.Ldfld, field);
+    }
+}
+
+static void Emit_st(ILCursor cursor, FieldDefinition field, Action<ILCursor> emitValue)
+{
+    if (field.IsStatic)
+    {
+        emitValue(cursor);
+        cursor.Emit(OpCodes.Stsfld, field);
+    }
+    else
+    {
+        cursor.Emit(OpCodes.Ldarg_0);
+        emitValue(cursor);
+        cursor.Emit(OpCodes.Stfld, field);
+    }
+}
+
+static ILCursor Emit_ldc_i4(ILCursor cursor, int value) => value switch
+{
+    -1 => cursor.Emit(OpCodes.Ldc_I4_M1),
+    0 => cursor.Emit(OpCodes.Ldc_I4_0),
+    1 => cursor.Emit(OpCodes.Ldc_I4_1),
+    2 => cursor.Emit(OpCodes.Ldc_I4_2),
+    3 => cursor.Emit(OpCodes.Ldc_I4_3),
+    4 => cursor.Emit(OpCodes.Ldc_I4_4),
+    5 => cursor.Emit(OpCodes.Ldc_I4_5),
+    6 => cursor.Emit(OpCodes.Ldc_I4_6),
+    7 => cursor.Emit(OpCodes.Ldc_I4_7),
+    8 => cursor.Emit(OpCodes.Ldc_I4_8),
+    >= sbyte.MinValue and <= sbyte.MaxValue => cursor.Emit(OpCodes.Ldc_I4_S, value),
+    _ => cursor.Emit(OpCodes.Ldc_I4, value),
+};
+
+static MethodDefinition CreateGetter(FieldDefinition field, int constant, FieldDefinition f_Initialized)
+{
+    var getter = new MethodDefinition(
+        $"get_{field.Name}",
+        MethodAttributes.Public
+        | MethodAttributes.HideBySig
+        | MethodAttributes.SpecialName
+        ,
+        field.FieldType
+    )
     {
         Body =
         {
@@ -94,26 +165,45 @@ static MethodDefinition GenerateThreadSafeGetter(FieldDefinition field)
         SemanticsAttributes = MethodSemanticsAttributes.Getter,
     };
 
-    var il = method.Body.GetILProcessor();
+    var cursor = new ILCursor(new ILContext(getter));
 
-    if (field.IsStatic)
+    // if (f_Initialized)
+    Emit_ld(cursor, f_Initialized);
+    cursor.Emit(OpCodes.Brfalse_S, Instruction.Create(OpCodes.Nop));
+    // Store instruction to modify jump destination later on
+    var i_if1 = cursor.Prev;
     {
-        il.Append(il.Create(OpCodes.Ldsfld, field));
+        // return field
+        Emit_ld(cursor, field);
+        cursor.Emit(OpCodes.Ret);
     }
-    else
+    // else
     {
-        il.Append(il.Create(OpCodes.Ldarg_0));
-        il.Append(il.Create(OpCodes.Ldfld, field));
+        var pos = cursor.Index;
+        // Duplicate value to return later
+        // field = constant
+        Emit_st(cursor, field, cursor => Emit_ldc_i4(cursor, constant).Emit(OpCodes.Dup));
+        // Rewrite jump target
+        i_if1.Operand = cursor.Instrs[pos];
+        // f_Initialized = true
+        Emit_st(cursor, f_Initialized, static cursor => cursor.Emit(OpCodes.Ldc_I4_1));
+        // return constant
+        cursor.Emit(OpCodes.Ret);
     }
 
-    il.Append(il.Create(OpCodes.Ret));
-
-    return method;
+    return getter;
 }
 
-static MethodDefinition GenerateThreadSafeSetter(FieldDefinition field)
+static MethodDefinition CreateSetter(FieldDefinition field, FieldDefinition f_Initialized)
 {
-    MethodDefinition method = new("set_" + field.Name, MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName, field.DeclaringType.Module.TypeSystem.Void)
+    var setter = new MethodDefinition(
+        $"set_{field.Name}",
+        MethodAttributes.Public
+        | MethodAttributes.HideBySig
+        | MethodAttributes.SpecialName
+        ,
+        field.DeclaringType.Module.TypeSystem.Void
+    )
     {
         Body =
         {
@@ -126,26 +216,20 @@ static MethodDefinition GenerateThreadSafeSetter(FieldDefinition field)
         HasThis = !field.IsStatic,
         IsSetter = true,
         IsStatic = field.IsStatic,
+        Parameters =
+        {
+            new("value", ParameterAttributes.None, field.FieldType),
+        },
         SemanticsAttributes = MethodSemanticsAttributes.Setter,
     };
 
-    method.Parameters.Add(new("value", ParameterAttributes.None, field.FieldType));
+    var cursor = new ILCursor(new ILContext(setter));
 
-    var il = method.Body.GetILProcessor();
+    // field = value
+    Emit_st(cursor, field, cursor => cursor.Emit(field.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1));
+    // f_Initialized = true
+    Emit_st(cursor, f_Initialized, static cursor => cursor.Emit(OpCodes.Ldc_I4_1));
+    cursor.Emit(OpCodes.Ret);
 
-    if (field.IsStatic)
-    {
-        il.Append(il.Create(OpCodes.Ldarg_0));
-        il.Append(il.Create(OpCodes.Stsfld, field));
-    }
-    else
-    {
-        il.Append(il.Create(OpCodes.Ldarg_0));
-        il.Append(il.Create(OpCodes.Ldarg_1));
-        il.Append(il.Create(OpCodes.Stfld, field));
-    }
-
-    il.Append(il.Create(OpCodes.Ret));
-
-    return method;
+    return setter;
 }
