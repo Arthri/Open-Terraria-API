@@ -24,7 +24,7 @@ public class PCServerTarget : IServerPatchTarget
 
     public virtual IFileResolver FileResolver { get; } = new PCFileResolver();
 
-    public virtual NugetPackageBuilder NugetPackager { get; } = new("OTAPI.PC.nupkg", "../../../../docs/OTAPI.PC.nuspec");
+    public virtual NugetPackageBuilder NugetPackager { get; } = new("OTAPI.PC.nupkg", "../../../../docs/OTAPI.PC.nuspec", false);
     public virtual MarkdownDocumentor MarkdownDocumentor { get; } = new("OTAPI.PC.Server.mfw.md");
 
     public virtual string ArtifactName { get; } = "artifact-pc";
