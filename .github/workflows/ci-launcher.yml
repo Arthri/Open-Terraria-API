@@ -47,6 +47,7 @@ jobs:
             release_tag: launcher-linux,
           },
         ]
+    name: Build ${{ matrix.profile.name }}
     defaults:
       run:
         shell: bash
