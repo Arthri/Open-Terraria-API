@@ -40,6 +40,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Build the project
         run: |
           (cd OTAPI.Patcher && exec dotnet run -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
