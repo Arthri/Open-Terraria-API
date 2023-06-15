@@ -1,6 +1,8 @@
 name: "CI-NuGet"
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push/pull events but only for the upcoming-nuget-release branch
   push:
     branches: [ upcoming-nuget-release ]
 
