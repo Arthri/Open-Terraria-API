@@ -10,7 +10,7 @@ jobs:
 
   Server:
     runs-on: ubuntu-latest
-    environment: NuGet
+    environment: CI
 
     strategy:
       fail-fast: false
