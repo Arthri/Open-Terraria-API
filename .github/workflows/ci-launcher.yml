@@ -72,7 +72,7 @@ jobs:
             cd OTAPI.Client.Launcher
             dotnet publish -r ${{ matrix.profile.runtime_identifier }} --framework net6.0 -p:PublishReadyToRun=true --self-contained false -c Release
             if ${{ matrix.profile.runs_on != 'macos_latest' }} ; then
-              7z a ../${{ matrix.profile.archive_name }} ./bin/Release/net6.0/${{ matrix.profile.runtime_identifier }}/publish/*
+              7z a ../${{ matrix.profile.archive_name }} './bin/Release/net6.0/${{ matrix.profile.runtime_identifier }}/publish/*'
             else
               mkdir -p OTAPI.app/Contents/Resources
               mv bin/Release/net6.0/osx-x64/publish OTAPI.app/Contents/MacOS
