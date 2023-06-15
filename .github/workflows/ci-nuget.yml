@@ -61,7 +61,7 @@ jobs:
           name: ${{ matrix.profile.name }} Wiki MD files
           path: OTAPI.Patcher/bin/Debug/net6.0/*.mfw.md
 
-      - name: "Publishing to NuGet"
+      - name: "Releasing to NuGet: ${{ matrix.profile.name }}"
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: dotnet nuget push OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.package_path }} --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
