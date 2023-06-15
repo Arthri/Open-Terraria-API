@@ -1,6 +1,8 @@
 name: "CI-NuGet"
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push/pull events but only for the upcoming-nuget-release branch
   push:
     branches: [ upcoming-nuget-release ]
 
@@ -8,7 +10,7 @@ jobs:
 
   Server:
     runs-on: ubuntu-latest
-    environment: NuGet
+    environment: CI
 
     strategy:
       fail-fast: false
@@ -38,6 +40,10 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Build the project
         run: |
           (cd OTAPI.Patcher && exec dotnet run -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
@@ -59,7 +65,7 @@ jobs:
           name: ${{ matrix.profile.name }} Wiki MD files
           path: OTAPI.Patcher/bin/Debug/net6.0/*.mfw.md
 
-      - name: "Publishing to NuGet"
+      - name: "Releasing to NuGet: ${{ matrix.profile.name }}"
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: dotnet nuget push OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.package_path }} --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
