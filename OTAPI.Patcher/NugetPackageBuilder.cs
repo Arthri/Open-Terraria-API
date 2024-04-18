@@ -95,7 +95,7 @@ public class NugetPackageBuilder
             {
                 var dest = Path.Combine("lib", platform);
                 packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.dll", dest);
-                packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.Runtime.dll", dest);
+                // packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.Runtime.dll", dest);
             }
 
             if (File.Exists(PackageName))

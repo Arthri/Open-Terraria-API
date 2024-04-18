@@ -96,7 +96,7 @@ public class PCServerTarget : IServerPatchTarget
 
             var refs = Path.Combine(basepath, "TerrariaServer.dll");
             var otapi = Path.Combine(ModContext.BaseDirectory, "OTAPI.dll");
-            var hooks = Path.Combine(ModContext.BaseDirectory, "OTAPI.Runtime.dll");
+            // var hooks = Path.Combine(ModContext.BaseDirectory, "OTAPI.Runtime.dll");
 
             ModContext.ReferenceFiles.AddRange(new[]
             {
@@ -202,8 +202,10 @@ public class PCServerTarget : IServerPatchTarget
                         }
                         else if (modType == ModType.Write)
                         {
+                            /*
                             modder.ModContext = new("OTAPI.Runtime"); // done with the context. they will be triggered again by runtime hooks if not for this
                             modder.CreateRuntimeHooks(hooks);
+                            */
 
                             Console.WriteLine("[OTAPI] Building NuGet package...");
                             NugetPackager.Build(modder);

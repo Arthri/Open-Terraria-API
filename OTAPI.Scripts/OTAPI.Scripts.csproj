@@ -17,18 +17,22 @@
     <Reference Include="OTAPI" Condition="Exists('..\OTAPI.Patcher\bin\Debug\net6.0\OTAPI.dll')">
       <HintPath>..\OTAPI.Patcher\bin\Debug\net6.0\OTAPI.dll</HintPath>
     </Reference>
+    <!--
     <Reference Include="OTAPI" Condition="Exists('..\OTAPI.Patcher\bin\Debug\net6.0\OTAPI.Runtime.dll')">
       <HintPath>..\OTAPI.Patcher\bin\Debug\net6.0\OTAPI.Runtime.dll</HintPath>
     </Reference>
+    -->
     <Reference Include="Steamworks.NET" Condition="Exists('..\OTAPI.Patcher\bin\Debug\net6.0\EmbeddedResources\Steamworks.NET.dll')">
       <HintPath>..\OTAPI.Patcher\bin\Debug\net6.0\EmbeddedResources\Steamworks.NET.dll</HintPath>
     </Reference>
     <Reference Include="OTAPI" Condition="Exists('..\OTAPI.Client.Launcher\bin\x64\Debug\net6.0\client\OTAPI.exe')">
       <HintPath>..\OTAPI.Client.Launcher\bin\x64\Debug\net6.0\client\OTAPI.exe</HintPath>
     </Reference>
+    <!--
     <Reference Include="OTAPI" Condition="Exists('..\OTAPI.Client.Launcher\bin\x64\Debug\net6.0\client\OTAPI.Runtime.dll')">
       <HintPath>..\OTAPI.Client.Launcher\bin\x64\Debug\net6.0\client\OTAPI.Runtime.dll</HintPath>
     </Reference>
+    -->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FNA\FNA.Core.csproj" />
