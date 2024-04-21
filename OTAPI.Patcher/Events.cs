@@ -29,3 +29,7 @@ public enum HookEvent
     Before,
     After
 }
+
+public delegate HookResult PreHookHandler<T>(T args);
+
+public delegate void PostHookHandler<T>(T args);

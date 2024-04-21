@@ -33,7 +33,7 @@ partial class NpcStrikeArgs
     static ParameterDefinition Entity { get; set; }
     static MethodDefinition StrikeNPC { get; set; }
 
-    [Modification(ModType.PreMerge, "Patching in entity source for NPC strike")]
+    [Modification(ModType.PrePatch, "Patching in entity source for NPC strike")]
     static void PatchNpcStrikeArgs(ModFwModder modder)
     {
         var csr = modder.GetILCursor(() => (new Terraria.NPC()).StrikeNPC(0, 0, 0, false, false, false));

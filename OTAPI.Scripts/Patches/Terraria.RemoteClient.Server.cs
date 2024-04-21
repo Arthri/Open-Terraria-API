@@ -20,6 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
 
 using System.Collections.Generic;
+using static OTAPI.Hooks.RemoteClient;
 
 /// <summary>
 /// @doc Adds a Terraria.RemoteClient.Data variable for data storage.
@@ -36,11 +37,37 @@ namespace Terraria
             Data = new Dictionary<string, object>();
         }
 
-        public extern void orig_Reset();
+        private extern void orig_Reset();
         public void Reset()
         {
-            orig_Reset();
-            Data.Clear();
+            var args = new ResetEventArgs
+            {
+                RemoteClient = this,
+            };
+            if (PreReset?.Invoke(args) != OTAPI.HookResult.Cancel)
+            {
+                orig_Reset();
+                Data.Clear();
+                PostReset?.Invoke(args);
+            }
+        }
+    }
+}
+
+namespace OTAPI
+{
+    partial class Hooks
+    {
+        public static partial class RemoteClient
+        {
+            public class ResetEventArgs
+            {
+                public Terraria.RemoteClient RemoteClient { get; init; }
+            }
+
+            public static PreHookHandler<ResetEventArgs>? PreReset;
+
+            public static PostHookHandler<ResetEventArgs>? PostReset;
         }
     }
 }
