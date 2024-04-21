@@ -3,6 +3,11 @@
     "path": "OTAPI.sln",
     "projects": [
       "FNA\\FNA.Core.csproj",
+      "ModFramework.Collections\\ModFramework.Collections.csproj",
+      "ModFramework\\ModFramework.Modules.CSharp\\ModFramework.Modules.CSharp.csproj",
+      "ModFramework\\ModFramework.Modules.ClearScript\\ModFramework.Modules.ClearScript.csproj",
+      "ModFramework\\ModFramework.Modules.Lua\\ModFramework.Modules.Lua.csproj",
+      "ModFramework\\ModFramework\\ModFramework.csproj",
       "OTAPI.Client.Launcher\\OTAPI.Client.Launcher.csproj",
       "OTAPI.Common\\OTAPI.Common.csproj",
       "OTAPI.Patcher\\OTAPI.Patcher.csproj",
