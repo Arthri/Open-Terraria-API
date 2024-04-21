@@ -12,12 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ModFramework" Version="1.1.7">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </PackageReference>
-    <PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.7" />
-    <PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.7" />
-    <PackageReference Include="ModFramework.Modules.Lua" Version="1.1.7" />
+    <ProjectReference Include="..\ModFramework\ModFramework\ModFramework.csproj" ExcludeFromSingleFile="true" />
+		<ProjectReference Include="..\ModFramework\ModFramework.Modules.ClearScript\ModFramework.Modules.ClearScript.csproj" />
+		<ProjectReference Include="..\ModFramework\ModFramework.Modules.CSharp\ModFramework.Modules.CSharp.csproj" />
+		<ProjectReference Include="..\ModFramework\ModFramework.Modules.Lua\ModFramework.Modules.Lua.csproj" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Steamworks.NET" Version="20.1.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
