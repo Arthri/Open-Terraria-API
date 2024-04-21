@@ -1,4 +1,5 @@
-﻿using Terraria.Net;
+﻿#if tModLoader_V1_4
+using Terraria.Net;
 using Terraria.Net.Sockets;
 using static OTAPI.Hooks.Net.NetManager;
 
@@ -49,3 +50,4 @@ namespace OTAPI
         }
     }
 }
+#endif
