@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+		<PackageVersion>1.1.7</PackageVersion>
+		<Version>1.1.7</Version>
+		<PackageId>ModFramework</PackageId>
+		<Authors>DeathCradle</Authors>
+		<PackOnBuild>true</PackOnBuild>
+		<Copyright>Copyright 2016-2022</Copyright>
+		<PackageLicenseUrl>https://github.com/SignatureBeef/ModFramework.NET/blob/default/LICENSE.txt</PackageLicenseUrl>
+		<Owners>DeathCradle</Owners>
+		<PackageProjectUrl>https://github.com/SignatureBeef/ModFramework.NET</PackageProjectUrl>
+		<Summary>Initial alpha version</Summary>
+		<Title>ModFramework</Title>
+		<Description>A tool for rewriting .net binaries. Can allow rewriting of Types to Interfaces, Arrays to Extensible Collections, or even Fields to Properties.</Description>
+		<PackageReleaseNotes>Fixed target framework resolution when using a higher SDK.</PackageReleaseNotes>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<ItemGroup>
+    <!--<PackageReference Include="MonoMod" Version="22.8.31.1-prerelease" />-->
+    <PackageReference Include="MonoMod" Version="22.5.1.1" />
+		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.5.1.1" />
+		<PackageReference Include="NuGet.Protocol" Version="6.3.1" />
+		<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\ModFramework.Collections\ModFramework.Collections.csproj" />
+	</ItemGroup>
+	<Target Name="CleanAll" AfterTargets="Clean">
+		<RemoveDir Directories="$(OUTDIR)" />
+	</Target>
+</Project>

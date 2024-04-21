@@ -2,6 +2,11 @@
   "solution": {
     "path": "OTAPI.sln",
     "projects": [
+      "ModFramework.Collections\\ModFramework.Collections.csproj",
+      "ModFramework\\ModFramework.Modules.CSharp\\ModFramework.Modules.CSharp.csproj",
+      "ModFramework\\ModFramework.Modules.ClearScript\\ModFramework.Modules.ClearScript.csproj",
+      "ModFramework\\ModFramework.Modules.Lua\\ModFramework.Modules.Lua.csproj",
+      "ModFramework\\ModFramework\\ModFramework.csproj",
       "OTAPI.Server.Launcher\\OTAPI.Server.Launcher.csproj",
       "examples\\RuntimeExample.Server\\RuntimeExample.Server.csproj"
     ]

@@ -212,6 +212,7 @@ public class PCClientTarget : IClientPatchTarget
                     {
                         // merge in HookResult, HookEvent etc
                         mm.ReadMod(typeof(HookEvent).Assembly.Location);
+                        mm.ReadMod(typeof(ModFramework.ICollection<>).Assembly.Location);
                         mm.ReadMod(Path.Combine(embeddedResourcesPath, "ReLogic.dll"));
                         mm.ReadMod(Path.Combine(embeddedResourcesPath, "RailSDK.Net.dll"));
                     //}

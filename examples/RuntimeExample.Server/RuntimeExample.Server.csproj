@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ModFramework" Version="1.1.7" />
+    <ProjectReference Include="..\ModFramework\ModFramework\ModFramework.csproj" ExcludeFromSingleFile="true" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

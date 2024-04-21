@@ -63,17 +63,18 @@ namespace Terraria
                     Environment.CurrentDirectory,
                     Environment.Is64BitProcess ? "x64" : "x86"
                 );
-                Directory.CreateDirectory(path);
-
-                try
+                if (Directory.Exists(path))
                 {
-                    SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-                    AddDllDirectory(path);
-                }
-                catch
-                {
-                    // Pre-Windows 7, KB2533623 
-                    SetDllDirectory(path);
+                    try
+                    {
+                        SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+                        AddDllDirectory(path);
+                    }
+                    catch
+                    {
+                        // Pre-Windows 7, KB2533623 
+                        SetDllDirectory(path);
+                    }
                 }
             }
 

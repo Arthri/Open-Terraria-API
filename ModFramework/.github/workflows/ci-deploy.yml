@@ -1,0 +1,36 @@
+name: Deploy NuGet
+
+on:
+  push:
+    branches: [ release ]
+  pull_request:
+    branches: [ release ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    environment: CI
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.302
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build ModFramework.sln --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release
+
+    # Publish
+    - name: Push ModFramework
+      run: dotnet nuget push ModFramework/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    - name: Push ModFramework.Modules.CSharp
+      run: dotnet nuget push ModFramework.Modules.CSharp/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    - name: Push ModFramework.Modules.ClearScript
+      run: dotnet nuget push ModFramework.Modules.ClearScript/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    - name: Push ModFramework.Modules.Lua
+      run: dotnet nuget push ModFramework.Modules.Lua/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
