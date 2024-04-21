@@ -37,18 +37,17 @@ public class NugetPackageBuilder
 
     public string PackageName { get; set; }
     public string NuspecPath { get; set; }
-    private bool _addSteamworksNET;
+    private Predicate<string>? _packagePredicate;
 
     public NugetPackageBuilder(string packageName, string nuspecPath)
     {
         PackageName = packageName;
         NuspecPath = nuspecPath;
-        _addSteamworksNET = true;
     }
 
-    public NugetPackageBuilder(string packageName, string nuspecPath, bool addSteamworksNET) : this(packageName, nuspecPath)
+    public NugetPackageBuilder(string packageName, string nuspecPath, Predicate<string> packagePredicate) : this(packageName, nuspecPath)
     {
-        _addSteamworksNET = addSteamworksNET;
+        _packagePredicate = packagePredicate;
     }
 
     public void Build(ModFwModder modder)
@@ -68,11 +67,12 @@ public class NugetPackageBuilder
             (typeof(MonoMod.MonoModder).Assembly.GetName().Name, Version: typeof(MonoMod.MonoModder).Assembly.GetName().Version.ToString()),
             (typeof(MonoMod.RuntimeDetour.Detour).Assembly.GetName().Name, Version: typeof(MonoMod.RuntimeDetour.Detour).Assembly.GetName().Version.ToString()),
             (newtonsoft.Name, Version: GetNugetVersionFromAssembly<Newtonsoft.Json.JsonConverter>().Split('+')[0]  ),
+            (steamworks.Name, Version: steamworks.Version.ToString()),
         }.AsEnumerable();
 
-        if (_addSteamworksNET)
+        if (_packagePredicate != null)
         {
-            dependencies = dependencies.Append((steamworks.Name, Version: steamworks.Version.ToString()));
+            dependencies = dependencies.Where(d => _packagePredicate(d.Item1));
         }
 
         var xml_dependency = String.Join("", dependencies.Select(dep => $"\n\t    <dependency id=\"{dep.Name}\" version=\"{dep.Version}\" />"));
@@ -95,7 +95,7 @@ public class NugetPackageBuilder
             {
                 var dest = Path.Combine("lib", platform);
                 packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.dll", dest);
-                packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.Runtime.dll", dest);
+                // packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.Runtime.dll", dest);
             }
 
             if (File.Exists(PackageName))

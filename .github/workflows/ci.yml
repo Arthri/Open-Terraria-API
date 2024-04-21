@@ -52,7 +52,6 @@ jobs:
       - name: Build the project
         run: |
           (cd OTAPI.Patcher && exec dotnet run -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
-          (cd OTAPI.Server.Launcher && exec dotnet run -test-init)
 
       - uses: actions/upload-artifact@v3
         with:

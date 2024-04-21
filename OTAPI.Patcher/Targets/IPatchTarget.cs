@@ -85,7 +85,7 @@ public static partial class PatchTargetExtensions
 
         File.Copy("../../../../COPYING.txt", Path.Combine(outputFolder, "COPYING.txt"));
         File.Copy("OTAPI.dll", Path.Combine(outputFolder, "OTAPI.dll"));
-        File.Copy("OTAPI.Runtime.dll", Path.Combine(outputFolder, "OTAPI.Runtime.dll"));
+        // File.Copy("OTAPI.Runtime.dll", Path.Combine(outputFolder, "OTAPI.Runtime.dll"));
     }
 
     public static void AddEnvMetadata(this ModFwModder modder)
