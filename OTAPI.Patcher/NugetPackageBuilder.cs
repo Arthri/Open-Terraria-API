@@ -70,7 +70,10 @@ public class NugetPackageBuilder
             (steamworks.Name, Version: steamworks.Version.ToString()),
         }.AsEnumerable();
 
-        dependencies = dependencies.Where(d => _packagePredicate(d.Item1));
+        if (_packagePredicate != null)
+        {
+            dependencies = dependencies.Where(d => _packagePredicate(d.Item1));
+        }
 
         var xml_dependency = String.Join("", dependencies.Select(dep => $"\n\t    <dependency id=\"{dep.Name}\" version=\"{dep.Version}\" />"));
         var xml_group = String.Join("", platforms.Select(platform => $"\n\t<group targetFramework=\"{platform}\">{xml_dependency}\n\t</group>"));
