@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿#if !tModLoader_V1_4
+using Terraria;
 using static OTAPI.Hooks.WorldGen;
 
 namespace Terraria
@@ -76,3 +77,4 @@ namespace OTAPI
         }
     }
 }
+#endif
