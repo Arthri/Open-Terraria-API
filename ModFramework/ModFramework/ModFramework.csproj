@@ -25,6 +25,9 @@
 		<PackageReference Include="NuGet.Protocol" Version="6.3.1" />
 		<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
 	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\ModFramework.Collections\ModFramework.Collections.csproj" />
+	</ItemGroup>
 	<Target Name="CleanAll" AfterTargets="Clean">
 		<RemoveDir Directories="$(OUTDIR)" />
 	</Target>

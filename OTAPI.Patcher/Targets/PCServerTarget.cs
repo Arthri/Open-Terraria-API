@@ -123,6 +123,7 @@ public class PCServerTarget : IServerPatchTarget
                     {
                         // merge in HookResult, HookEvent etc
                         mm.ReadMod(typeof(HookEvent).Assembly.Location);
+                        mm.ReadMod(typeof(ModFramework.ICollection<>).Assembly.Location);
 
                         Console.WriteLine($"[OTAPI] Changing to AnyCPU (x64 preferred)");
                         mm.SetAnyCPU();
