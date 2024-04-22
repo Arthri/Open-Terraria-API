@@ -1,4 +1,4 @@
-﻿using AsmAnalyzer;
+using AsmAnalyzer;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Microsoft.Extensions.Logging;
@@ -27,7 +27,7 @@ Log.Logger = new LoggerConfiguration()
             + "{#end}"
             + "{@m:lj}\n{@x}"
         ),
-        $"analysis_{DateTime.UtcNow:yyyy-MM-ddThh-mm-ss}.txt",
+        $"analysis_{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.txt",
         rollOnFileSizeLimit: true
     )
     .CreateLogger()
