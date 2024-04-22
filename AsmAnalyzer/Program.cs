@@ -1,4 +1,4 @@
-using AsmAnalyzer;
+﻿using AsmAnalyzer;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Microsoft.Extensions.Logging;
@@ -63,6 +63,7 @@ foreach (var file in filesToAnalyze)
                 {
                     var flaggedReferences = new HashSet<MetadataToken>();
                     using (logger.BeginScope("TypeRef Table"))
+                    {
                         foreach (var typeReference in module.GetImportedTypeReferences())
                         {
                             if (typeReference.Scope == null)
@@ -81,18 +82,17 @@ foreach (var file in filesToAnalyze)
                                 flaggedReferences.Add(typeReference.MetadataToken);
                             }
                         }
+                    }
 
                     new ModuleAnalyzer(logger, module, flaggedReferences).Analyze();
                 }
-                catch (Exception e)
+                catch (Exception e) when (Run(() => logger.LogError(e, "Error during analysis of module")))
                 {
-                    logger.LogError(e, "Error during analysis of module");
                 }
             }
         }
-        catch (Exception e)
+        catch (Exception e) when (Run(() => logger.LogError(e, "Error during analysis of assembly")))
         {
-            logger.LogError(e, "Error during analysis of assembly");
         }
     }
 }
