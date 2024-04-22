@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System;
 
 namespace ModFramework.Relinker
 {
@@ -55,12 +56,18 @@ namespace ModFramework.Relinker
         {
             this.Type = type;
 
-            //ICollectionRef = modder.FindType($"ModFramework.{nameof(ModFramework.ICollection<object>)}`1");
-            //CollectionRef = modder.FindType($"ModFramework.{nameof(ModFramework.DefaultCollection<object>)}`1");
+            ICollectionRef = modder.Module.GetType(typeof(ICollection<>).FullName);
+            CollectionRef = modder.Module.GetType(typeof(DefaultCollection<>).FullName);
 
-            //var asdasd = modder.GetReference(() => ICollection<object>);
-            ICollectionRef = modder.Module.ImportReference(typeof(ICollection<>));
-            CollectionRef = modder.Module.ImportReference(typeof(DefaultCollection<>));
+            if (ICollectionRef is null)
+            {
+                throw new InvalidOperationException($"Unable to find {typeof(ICollection<>).FullName}");
+            }
+            if (CollectionRef is null)
+            {
+                throw new InvalidOperationException($"Unable to find {typeof(DefaultCollection<>).FullName}");
+            }
+
 
 
             ICollectionDef = ICollectionRef.Resolve();
