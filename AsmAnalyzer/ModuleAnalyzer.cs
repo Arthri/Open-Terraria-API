@@ -1,4 +1,4 @@
-using AsmResolver;
+﻿using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures.Types;
@@ -596,7 +596,7 @@ internal class ModuleAnalyzer(ILogger Logger, ModuleDefinition Module, HashSet<M
     {
         using (Logger.BeginScope("Method Signature"))
         {
-            if (signature.SentinelParameterTypes is [_, ..])
+            if (signature.SentinelParameterTypes.Count > 0)
             {
                 using (Logger.BeginScope("Sentinels"))
                 {
