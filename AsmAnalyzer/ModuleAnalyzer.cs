@@ -1,4 +1,4 @@
-﻿using AsmResolver;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures.Types;
@@ -439,43 +439,43 @@ internal class ModuleAnalyzer(ILogger Logger, ModuleDefinition Module, HashSet<M
                     }
                 }
             }
+        }
 
-            if (body.Instructions.Count > 0)
+        if (body.Instructions.Count > 0)
+        {
+            using (Logger.BeginScope("Instructions"))
             {
-                using (Logger.BeginScope("Instructions"))
+                foreach (var instruction in body.Instructions)
                 {
-                    foreach (var instruction in body.Instructions)
+                    using (Logger.BeginScope("0x{Offset} {OpCode}", instruction.Offset.ToString("X8"), instruction.OpCode))
                     {
-                        using (Logger.BeginScope("0x{Offset} {OpCode}", instruction.Offset.ToString("X8"), instruction.OpCode))
+                        if (instruction.Operand is TypeSignature ts)
                         {
-                            if (instruction.Operand is TypeSignature ts)
+                            AnalyzeTypeSignature(ts);
+                        }
+                        else if (instruction.Operand is TypeReference tr)
+                        {
+                            AnalyzeTypeReference(tr);
+                        }
+                        else if (instruction.Operand is MemberReference mr)
+                        {
+                            if (mr.DeclaringType is not null)
                             {
-                                AnalyzeTypeSignature(ts);
+                                AnalyzeTypeReference(mr.DeclaringType);
                             }
-                            else if (instruction.Operand is TypeReference tr)
+                            using (Logger.BeginScope("MemberReference"))
                             {
-                                AnalyzeTypeReference(tr);
-                            }
-                            else if (instruction.Operand is MemberReference mr)
-                            {
-                                if (mr.DeclaringType is not null)
+                                if (mr.Signature is MethodSignature ms)
                                 {
-                                    AnalyzeTypeReference(mr.DeclaringType);
+                                    AnalyzeMethodSignature(ms);
                                 }
-                                using (Logger.BeginScope("MemberReference"))
+                                else if (mr.Signature is FieldSignature fs)
                                 {
-                                    if (mr.Signature is MethodSignature ms)
-                                    {
-                                        AnalyzeMethodSignature(ms);
-                                    }
-                                    else if (mr.Signature is FieldSignature fs)
-                                    {
-                                        AnalyzeFieldSignature(fs);
-                                    }
-                                    else
-                                    {
-                                        throw new NotSupportedException($"Unsupported member reference {mr.GetType().FullName}");
-                                    }
+                                    AnalyzeFieldSignature(fs);
+                                }
+                                else
+                                {
+                                    throw new NotSupportedException($"Unsupported member reference {mr.GetType().FullName}");
                                 }
                             }
                         }
