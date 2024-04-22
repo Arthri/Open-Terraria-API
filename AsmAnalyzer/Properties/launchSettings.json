@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "AsmAnalyzer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"$(MSBuildProjectDirectory)\\..\\OTAPI.Patcher\\bin\\Debug\\net6.0\\OTAPI.dll\"",
+      "workingDirectory": "$(OutDir)"
+    }
+  }
+}
