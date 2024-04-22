@@ -447,27 +447,36 @@ internal class ModuleAnalyzer(ILogger Logger, ModuleDefinition Module, HashSet<M
                     foreach (var instruction in body.Instructions)
                     {
                         using (Logger.BeginScope("0x{Offset} {OpCode}", instruction.Offset.ToString("X8"), instruction.OpCode))
-                        if (instruction.Operand is TypeSignature ts)
                         {
-                            AnalyzeTypeSignature(ts);
-                        }
-                        else if (instruction.Operand is TypeReference tr)
-                        {
-                            AnalyzeTypeReference(tr);
-                        }
-                        else if (instruction.Operand is MemberReference mr)
-                        {
-                            if (mr.Signature is MethodSignature ms)
+                            if (instruction.Operand is TypeSignature ts)
                             {
-                                AnalyzeMethodSignature(ms);
+                                AnalyzeTypeSignature(ts);
                             }
-                            else if (mr.Signature is FieldSignature fs)
+                            else if (instruction.Operand is TypeReference tr)
                             {
-                                AnalyzeFieldSignature(fs);
+                                AnalyzeTypeReference(tr);
                             }
-                            else
+                            else if (instruction.Operand is MemberReference mr)
                             {
-                                throw new NotSupportedException($"Unsupported member reference {mr.GetType().FullName}");
+                                if (mr.DeclaringType is not null)
+                                {
+                                    AnalyzeTypeReference(mr.DeclaringType);
+                                }
+                                using (Logger.BeginScope("MemberReference"))
+                                {
+                                    if (mr.Signature is MethodSignature ms)
+                                    {
+                                        AnalyzeMethodSignature(ms);
+                                    }
+                                    else if (mr.Signature is FieldSignature fs)
+                                    {
+                                        AnalyzeFieldSignature(fs);
+                                    }
+                                    else
+                                    {
+                                        throw new NotSupportedException($"Unsupported member reference {mr.GetType().FullName}");
+                                    }
+                                }
                             }
                         }
                     }
