@@ -57,8 +57,8 @@ class B384680188CA4A9083017801C2A34C95
     [Modification(ModType.PreMerge, "Deduplicating Newtonsoft.Json references")]
     void DeduplicateNewtonsoftJson(MonoModder modder)
     {
-        AssemblyReference firstFound = null;
-        var referencesToRemove = new List<AssemblyReference>();
+        AssemblyNameReference firstFound = null;
+        var referencesToRemove = new List<AssemblyNameReference>();
         foreach (var reference in modder.Module.AssemblyReferences)
         {
             if (firstFound is null)
