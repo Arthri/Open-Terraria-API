@@ -40,6 +40,7 @@ void ThreadSafeProperties(ModFwModder modder)
     RemapAsThreadSafeProperty(f_myPlayer, modder, 255);
 }
 
+[MonoMod.MonoModIgnore]
 static PropertyDefinition RemapAsThreadSafeProperty(FieldDefinition field, ModFwModder modder, int constant)
 {
     // Add a new field which indicates if the specified field has been initialized yet
@@ -82,6 +83,7 @@ static PropertyDefinition RemapAsThreadSafeProperty(FieldDefinition field, ModFw
     return property;
 }
 
+[MonoMod.MonoModIgnore]
 static CustomAttribute CreateThreadStaticAttribute(IMemberDefinition member)
 {
     var attr = member.DeclaringType.Module.GetCoreLibMethod("System", "ThreadStaticAttribute", ".ctor");
@@ -89,6 +91,7 @@ static CustomAttribute CreateThreadStaticAttribute(IMemberDefinition member)
     return new(attr);
 }
 
+[MonoMod.MonoModIgnore]
 static CustomAttribute CreateCompilerGeneratedAttribute(IMemberDefinition member)
 {
     var attr = member.DeclaringType.Module.GetCoreLibMethod("System.Runtime.CompilerServices", "CompilerGeneratedAttribute", ".ctor");
@@ -96,6 +99,7 @@ static CustomAttribute CreateCompilerGeneratedAttribute(IMemberDefinition member
     return new(attr);
 }
 
+[MonoMod.MonoModIgnore]
 static void Emit_ld(ILCursor cursor, FieldDefinition field)
 {
     if (field.IsStatic)
@@ -109,6 +113,7 @@ static void Emit_ld(ILCursor cursor, FieldDefinition field)
     }
 }
 
+[MonoMod.MonoModIgnore]
 static void Emit_st(ILCursor cursor, FieldDefinition field, Action<ILCursor> emitValue)
 {
     if (field.IsStatic)
@@ -124,6 +129,7 @@ static void Emit_st(ILCursor cursor, FieldDefinition field, Action<ILCursor> emi
     }
 }
 
+[MonoMod.MonoModIgnore]
 static ILCursor Emit_ldc_i4(ILCursor cursor, int value) => value switch
 {
     -1 => cursor.Emit(OpCodes.Ldc_I4_M1),
@@ -140,6 +146,7 @@ static ILCursor Emit_ldc_i4(ILCursor cursor, int value) => value switch
     _ => cursor.Emit(OpCodes.Ldc_I4, value),
 };
 
+[MonoMod.MonoModIgnore]
 static MethodDefinition CreateGetter(FieldDefinition field, int constant, FieldDefinition f_Initialized)
 {
     var getter = new MethodDefinition(
@@ -194,6 +201,7 @@ static MethodDefinition CreateGetter(FieldDefinition field, int constant, FieldD
     return getter;
 }
 
+[MonoMod.MonoModIgnore]
 static MethodDefinition CreateSetter(FieldDefinition field, FieldDefinition f_Initialized)
 {
     var setter = new MethodDefinition(
