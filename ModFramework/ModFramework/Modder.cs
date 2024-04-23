@@ -118,6 +118,11 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
             RunTasks(t => t.Relink(body, instr));
             OnRewritingMethodBody?.Invoke(modder, body, instr, instri);
         };
+        // Needed because MonoMod throws an NRE
+        // as it tries to read a null Scope
+        ShouldCleanupAttrib = (mtp, attribType) => 
+            attribType.Scope?.Name is "MonoMod" or "MonoMod.exe" or "MonoMod.dll"
+            || attribType.FullName.StartsWith("MonoMod.MonoMod", StringComparison.Ordinal);
 
         AddTask<EventDelegateRelinker>();
     }
