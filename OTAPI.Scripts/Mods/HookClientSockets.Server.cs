@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0436 // Type conflicts with imported type
 
 #if tModLoaderServer_V1_3
-System.Console.WriteLine("Tcp interfaces not available in TML1.3");
+#warning Tcp interfaces not available in TML1.3
 #else
 using ModFramework;
 using Mono.Cecil;

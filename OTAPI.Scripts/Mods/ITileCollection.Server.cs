@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoader_V1_4
-System.Console.WriteLine("ITile not available in TML");
+#warning ITile not available in TML
 #else
 using ModFramework;
 using ModFramework.Relinker;

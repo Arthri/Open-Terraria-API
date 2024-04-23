@@ -41,5 +41,5 @@ class B384680188CA4A9083017801C2A34C95
 	}
 }
 #else
-System.Console.WriteLine("WeGame patch not needed on TML1.4");
+#warning WeGame patch not needed on TML1.4
 #endif

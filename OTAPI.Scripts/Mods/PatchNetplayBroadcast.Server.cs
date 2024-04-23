@@ -26,7 +26,7 @@ using System.Linq;
 using System.Runtime.ConstrainedExecution;
 
 #if tModLoaderServer_V1_3 || tModLoader_V1_4
-System.Console.WriteLine("BroadcastThread not available in TML");
+#warning BroadcastThread not available in TML
 #else
 [MonoMod.MonoModIgnore]
 class B384680188CA4A9083017801C2A34C95

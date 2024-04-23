@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0436 // Type conflicts with imported type
 
 #if tModLoaderServer_V1_3 || tModLoader_V1_4
-System.Console.WriteLine("Npc loot not available in TML");
+#warning Npc loot not available in TML
 #else
 using System;
 using ModFramework;

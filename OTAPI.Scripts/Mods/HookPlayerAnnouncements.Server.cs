@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0436 // Type conflicts with imported type
 
 #if tModLoaderServer_V1_3
-System.Console.WriteLine("Player announce not available in TML1.3");
+#warning Player announce not available in TML1.3
 #else
 using System;
 using System.Linq;
