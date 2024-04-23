@@ -69,7 +69,6 @@ class B384680188CA4A9083017801C2A34C95
             else
             {
                 referencesToRemove.Add(reference);
-                modder.RelinkModuleMap[reference.Name] = firstFound;
             }
         }
 
