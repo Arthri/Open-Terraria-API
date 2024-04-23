@@ -31,7 +31,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Adding autoSave check to saveAndPlay")]
     [MonoMod.MonoModIgnore]
-    void SaveAndPlay(MonoModder modder)
+    static void SaveAndPlay(MonoModder modder)
     {
         var vanilla = modder.GetILCursor(() => Terraria.WorldGen.saveAndPlay());
         var autoSave = modder.GetFieldDefinition(() => Terraria.Main.autoSave);

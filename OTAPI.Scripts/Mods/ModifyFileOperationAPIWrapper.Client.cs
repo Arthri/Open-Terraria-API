@@ -28,7 +28,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Patching FileOperationAPIWrapper.SHFILEOPSTRUCT to work for x64")]
     [MonoMod.MonoModIgnore]
-    void ModifyFileOperationAPIWrapper(ModFwModder modder)
+    static void ModifyFileOperationAPIWrapper(ModFwModder modder)
     {
         // windows only mod, but tls needs a Main()
         var type = modder.Module.GetType("Terraria.Utilities.FileOperationAPIWrapper/SHFILEOPSTRUCT");

@@ -37,7 +37,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking command processing")]
     [MonoMod.MonoModIgnore]
-    void HookCommandProcessing(MonoModder modder)
+    static void HookCommandProcessing(MonoModder modder)
     {
         var startDedInputCallBack = modder.GetILCursor(() => Terraria.Main.startDedInputCallBack());
 

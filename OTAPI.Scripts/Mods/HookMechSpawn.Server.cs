@@ -35,7 +35,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking statue spawning")]
     [MonoModIgnore]
-    void HookMechSpawn(MonoModder modder)
+    static void HookMechSpawn(MonoModder modder)
     {
         HookMethod(modder, () => Terraria.NPC.MechSpawn(0, 0, 0), OTAPI.Hooks.NPC.InvokeMechSpawn);
         HookMethod(modder, () => Terraria.Item.MechSpawn(0, 0, 0), OTAPI.Hooks.Item.InvokeMechSpawn);

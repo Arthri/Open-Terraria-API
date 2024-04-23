@@ -37,7 +37,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Removing NetMessage.SendData write buffer")]
     [MonoMod.MonoModIgnore]
-    void PatchSendDataWriter(MonoModder modder)
+    static void PatchSendDataWriter(MonoModder modder)
     {
 #if TerrariaServer_SendDataNumber8
         var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));

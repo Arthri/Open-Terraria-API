@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Updating native assembly loading")]
     [MonoMod.MonoModIgnore]
-    void PathMonoLaunch(MonoModder modder)
+    static void PathMonoLaunch(MonoModder modder)
     {
         var mth = modder.Module.GetType("MonoLaunch").Methods.Single(m => m.Name == "ResolveNativeLibrary");
         var rnl = modder.GetILCursor(mth);

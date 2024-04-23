@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Terraria.MessageBuffer.GetData")]
     [MonoMod.MonoModIgnore]
-    void HookClientGetData(MonoModder modder)
+    static void HookClientGetData(MonoModder modder)
     {
         int temp = 0;
         var GetData = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out temp));

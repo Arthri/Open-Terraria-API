@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Patching in Client UUID")]
     [MonoMod.MonoModIgnore]
-    void PatchClientUUID(MonoModder modder)
+    static void PatchClientUUID(MonoModder modder)
     {
         const int PacketID = 68;
         int messageType = 0;

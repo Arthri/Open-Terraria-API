@@ -34,7 +34,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Create)")]
     [MonoMod.MonoModIgnore]
-    void HookNpcCreate(MonoModder modder)
+    static void HookNpcCreate(MonoModder modder)
     {
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
         var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeCreate(default, default, default, default, default, default, default, default, default, default));

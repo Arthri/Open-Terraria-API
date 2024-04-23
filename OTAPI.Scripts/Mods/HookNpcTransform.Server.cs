@@ -34,7 +34,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Npc.Transform")]
     [MonoMod.MonoModIgnore]
-    void HookNpcTransform(MonoModder modder)
+    static void HookNpcTransform(MonoModder modder)
     {
         var transform = modder.GetILCursor(() => (new Terraria.NPC()).Transform(0));
 

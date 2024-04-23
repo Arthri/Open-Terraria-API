@@ -31,7 +31,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Patching zero-length packet exploits")]
     [MonoMod.MonoModIgnore]
-    void PatchZeroLengthPackets(MonoModder modder)
+    static void PatchZeroLengthPackets(MonoModder modder)
     {
         // find the only instance of ToUint16, get it's stored variable and add a 0 length check to break out
         var checkBytes = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));

@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Patching various private methods for public access")]
     [MonoMod.MonoModIgnore]
-    void PatchPrivateClasses(MonoModder modder)
+    static void PatchPrivateClasses(MonoModder modder)
     {
         modder.Module.GetType("MonoLaunch").SetPublic(true);
         modder.Module.GetType("Terraria.Program").SetPublic(true);

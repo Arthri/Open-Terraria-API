@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Adding Terraria.NPC.OnSetDefaultType()")]
     [MonoMod.MonoModIgnore]
-    void CreateOnSetDefaultType(MonoModder modder)
+    static void CreateOnSetDefaultType(MonoModder modder)
     {
 #if tModLoaderServer_V1_3
         var SetDefaults = modder.GetILCursor(() => new Terraria.NPC().SetDefaults(0, 0f));

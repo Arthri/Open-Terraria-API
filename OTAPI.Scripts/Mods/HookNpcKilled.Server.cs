@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Terraria.NPC.checkDead")]
     [MonoMod.MonoModIgnore]
-    void HookNpcKilled(MonoModder modder)
+    static void HookNpcKilled(MonoModder modder)
     {
         var checkDead = modder.GetILCursor(() => (new Terraria.NPC()).checkDead());
 

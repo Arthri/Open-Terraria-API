@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Hooking new Main calls", ModPriority.Last)]
     [MonoMod.MonoModIgnore]
-    void HookMainCtor(MonoModder modder)
+    static void HookMainCtor(MonoModder modder)
     {
 Terraria_1442_OrAbove
         var LaunchGame = modder.GetILCursor(() => Terraria.Program.RunGame());

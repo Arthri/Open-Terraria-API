@@ -34,7 +34,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking wiring announce box")]
     [MonoMod.MonoModIgnore]
-    void HookWiringAnnounceBox(MonoModder modder)
+    static void HookWiringAnnounceBox(MonoModder modder)
     {
 #if tModLoader_V1_4
         var mth = modder.Module.GetType("Terraria.Wiring").Methods.Single(m => m.Name == "HitWireSingle");

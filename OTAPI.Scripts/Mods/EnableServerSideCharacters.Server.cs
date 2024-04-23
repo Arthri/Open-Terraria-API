@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Enabling server side characters")]
     [MonoMod.MonoModIgnore]
-    void EnableServerSideCharacters(MonoModder modder)
+    static void EnableServerSideCharacters(MonoModder modder)
     {
         // find the occurance of downedClown and insert the SSC field to the missing BitsByte instance
 #if TerrariaServer_SendDataNumber8

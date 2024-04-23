@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking meteors")]
     [MonoMod.MonoModIgnore]
-    void HookMeteors(ModFramework.ModFwModder modder)
+    static void HookMeteors(ModFramework.ModFwModder modder)
     {
         var csr = modder.GetILCursor(() => Terraria.WorldGen.meteor(0, 0, false));
 

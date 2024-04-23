@@ -38,7 +38,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking hardmode tile placements")]
     [MonoMod.MonoModIgnore]
-    void HardModeTilePlacement(MonoModder modder)
+    static void HardModeTilePlacement(MonoModder modder)
     {
         var csr = modder.GetILCursor(() => Terraria.WorldGen.hardUpdateWorld(0, 0));
         var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.WorldGen.InvokeHardmodeTilePlace(0, 0, 0, false, false, 0, 0));

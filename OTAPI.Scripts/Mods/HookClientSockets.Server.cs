@@ -37,7 +37,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking tcp interfaces")]
     [MonoMod.MonoModIgnore]
-    void HookClientSockets(ModFwModder modder)
+    static void HookClientSockets(ModFwModder modder)
     {
         var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.Netplay.InvokeCreateTcpListener());
         var tcpSocket = modder.GetDefinition<TcpSocket>();

@@ -35,7 +35,7 @@ class B384680188CA4A9083017801C2A34C95
 	/// </summary>
 	[Modification(ModType.PreMerge, "Patching RailSDK")]
 	[MonoMod.MonoModIgnore]
-	void PatchRailSDK(MonoModder modder)
+	static void PatchRailSDK(MonoModder modder)
 	{
 		var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("RailSDK.NET.dll", System.StringComparison.CurrentCultureIgnoreCase));
 		var er = sw as EmbeddedResource;

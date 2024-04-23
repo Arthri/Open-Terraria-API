@@ -40,7 +40,7 @@ class B384680188CA4A9083017801C2A34C95
         "ITileProperties", // properties required first, interfaces do not like instance fields
     })]
     [MonoMod.MonoModIgnore]
-    void ITile(ModFwModder modder)
+    static void ITile(ModFwModder modder)
     {
         var tile = modder.GetDefinition<Terraria.Tile>();
         var itile = tile.RemapAsInterface(modder);

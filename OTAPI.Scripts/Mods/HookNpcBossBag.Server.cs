@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking npc boss bags")]
     [MonoMod.MonoModIgnore]
-    void HookNpcBossBag(ModFramework.ModFwModder modder)
+    static void HookNpcBossBag(ModFramework.ModFwModder modder)
     {
         // replace NewItem calls, and handle the -1 result to cancel the method from actioning.
 

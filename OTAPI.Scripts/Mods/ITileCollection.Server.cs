@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Implementing Tile collections")]
     [MonoMod.MonoModIgnore]
-    void ITileCollection(ModFwModder modder, IRelinkProvider relinkProvider)
+    static void ITileCollection(ModFwModder modder, IRelinkProvider relinkProvider)
     {
         var tile = modder.GetDefinition<Terraria.Tile>();
         tile.RelinkAsCollection(modder);

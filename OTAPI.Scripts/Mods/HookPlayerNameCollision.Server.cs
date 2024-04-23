@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PrePatch, "Hooking player name collisions")]
     [MonoMod.MonoModIgnore]
-    void HookPlayerNameCollision(MonoModder modder)
+    static void HookPlayerNameCollision(MonoModder modder)
     {
         int tmp;
         var csr = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out tmp));

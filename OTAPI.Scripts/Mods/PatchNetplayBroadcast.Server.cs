@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Patching Netplay Broadcast")]
     [MonoMod.MonoModIgnore]
-    void PatchNetplayBroadcast(MonoModder modder)
+    static void PatchNetplayBroadcast(MonoModder modder)
     {
         const string Name_BroadcastThreadActive = nameof(Terraria.patch_Netplay.BroadcastThreadActive);
         var BroadcastThread = modder.GetILCursor(() => Terraria.Netplay.BroadcastThread());

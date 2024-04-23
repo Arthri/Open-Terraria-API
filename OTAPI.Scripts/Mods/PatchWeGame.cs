@@ -30,7 +30,7 @@ class B384680188CA4A9083017801C2A34C95
 	/// </summary>
 	[Modification(ModType.PreMerge, "Removing WeGame windows calls")]
 	[MonoMod.MonoModIgnore]
-	void RemoveWeGame(MonoModder modder)
+	static void RemoveWeGame(MonoModder modder)
 	{
 		var ctr = modder.GetDefinition<Terraria.Social.WeGame.CurrentThreadRunner>();
 		ctr.Fields.Clear();

@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
         "PatchSendDataLocks",
     })]
     [MonoMod.MonoModIgnore]
-    void OnPacketWrite(MonoModder modder)
+    static void OnPacketWrite(MonoModder modder)
     {
         /*
         * Find ISocket.IsConnected and look back for Main.netMode. Before that instruction a hook can be used to modify the packet.

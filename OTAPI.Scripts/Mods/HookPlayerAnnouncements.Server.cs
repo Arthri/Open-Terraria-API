@@ -39,7 +39,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking player announcements (has join, has left)")]
     [MonoMod.MonoModIgnore]
-    void HookPlayerAnnouncements(ModFwModder modder)
+    static void HookPlayerAnnouncements(ModFwModder modder)
     {
 #if tModLoader_V1_4
         var mth = modder.Module.GetType("Terraria.NetMessage").Methods.Single(m => m.Name == "SyncOnePlayer");

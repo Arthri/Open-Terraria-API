@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
 	/// </summary>
 	[Modification(ModType.PreMerge, "Removing ReLogic Embedded Resource")]
 	[MonoMod.MonoModIgnore]
-	void RemoveReLogicResource(MonoModder modder)
+	static void RemoveReLogicResource(MonoModder modder)
 	{
 		var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("ReLogic.dll", System.StringComparison.CurrentCultureIgnoreCase));
 		modder.Module.Resources.Remove(sw);

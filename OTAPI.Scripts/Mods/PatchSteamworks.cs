@@ -35,7 +35,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Patching Steamworks.NET")]
     [MonoMod.MonoModIgnore]
-    void PatchSteam(MonoModder modder)
+    static void PatchSteam(MonoModder modder)
     {
         var desired = typeof(Steamworks.SteamShutdown_t).Assembly.GetName().Version;
 

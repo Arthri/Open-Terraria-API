@@ -34,7 +34,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Main.statusText")]
     [MonoMod.MonoModIgnore]
-    void HookMainStatusText(ModFwModder modder)
+    static void HookMainStatusText(ModFwModder modder)
     {
         var field = modder.GetFieldDefinition(() => Terraria.Main.statusText);
         var property = field.RemapAsProperty(modder);

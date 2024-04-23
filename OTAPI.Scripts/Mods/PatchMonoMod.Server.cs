@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Updating MonoMod libs")]
     [MonoMod.MonoModIgnore]
-    void PatchMonoMod(MonoModder modder)
+    static void PatchMonoMod(MonoModder modder)
     {
         var desired = typeof(MonoMod.MonoModder).Assembly.GetName().Version;
 

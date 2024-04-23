@@ -38,7 +38,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking hardmode tile updates")]
     [MonoMod.MonoModIgnore]
-    void HardModeTileUpdates(MonoModder modder)
+    static void HardModeTileUpdates(MonoModder modder)
     {
         var tile = modder.GetFieldDefinition(() => Terraria.Main.tile);
         var tileType = (tile.FieldType as ArrayType).ElementType;

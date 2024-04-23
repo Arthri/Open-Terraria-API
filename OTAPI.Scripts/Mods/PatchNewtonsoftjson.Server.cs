@@ -35,7 +35,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PostPatch, "Upgrading Newtonsoft.Json")]
     [MonoMod.MonoModIgnore]
-    void PatchNewtonsoftJson(MonoModder modder)
+    static void PatchNewtonsoftJson(MonoModder modder)
     {
         var desired = typeof(Newtonsoft.Json.JsonConvert).Assembly.GetName().Version;
 

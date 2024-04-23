@@ -34,7 +34,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Spawn)")]
     [MonoModIgnore]
-    void HookNpcSpawn(MonoModder modder)
+    static void HookNpcSpawn(MonoModder modder)
     {
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
         var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default, default));

@@ -28,7 +28,7 @@ class B384680188CA4A9083017801C2A34C95
     /// @doc A mod to change the Terraria or TerrariaServer name to OTAPI so cross platform plugins only need to reference one assembly name
     /// </summary>
     [Modification(ModType.PostPatch, "Changing assembly name to OTAPI", ModPriority.Last)]
-    void ChangeAssemblyName(MonoModder modder)
+    static void ChangeAssemblyName(MonoModder modder)
     {
         foreach (var asmref in modder.Module.AssemblyReferences)
         {

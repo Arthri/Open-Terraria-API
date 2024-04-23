@@ -36,7 +36,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Hooking Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC")]
     [MonoMod.MonoModIgnore]
-    void HookNpcLoot(MonoModder modder)
+    static void HookNpcLoot(MonoModder modder)
     {
         var NewNPC = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC(default, default, default, default));
 

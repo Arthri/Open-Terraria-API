@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
 	/// </summary>
 	[Modification(ModType.PreMerge, "Removing world map")]
 	[MonoMod.MonoModIgnore]
-	void RemoveMap(MonoModder modder)
+	static void RemoveMap(MonoModder modder)
 	{
 		var worldMap = modder.GetDefinition<Terraria.Map.WorldMap>();
 		foreach (var method in worldMap.Methods)

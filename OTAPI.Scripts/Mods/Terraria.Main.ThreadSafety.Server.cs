@@ -33,7 +33,7 @@ class B384680188CA4A9083017801C2A34C95
     /// @doc Transforms the thread-unsafe fields of Terraria.Main into thread-safe properties
     /// </summary>
     [Modification(ModType.PreMerge, "Mapping Thread-Unsafe Fields to Properties")]
-    void ThreadSafeProperties(ModFwModder modder)
+    static void ThreadSafeProperties(ModFwModder modder)
     {
         var f_netMode = modder.GetFieldDefinition(() => Main.netMode);
         RemapAsThreadSafeProperty(f_netMode, modder, 2);

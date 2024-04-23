@@ -35,7 +35,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </remarks>
     [Modification(ModType.PreMerge, "Allowing AchievementInitializer to run on servers")]
     [MonoMod.MonoModIgnore]
-    void PatchAchievementInitializer(ModFwModder modder)
+    static void PatchAchievementInitializer(ModFwModder modder)
     {
         var m_Load = modder.GetMethodDefinition(() => AchievementInitializer.Load());
 

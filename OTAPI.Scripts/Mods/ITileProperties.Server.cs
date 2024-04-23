@@ -32,7 +32,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Implementing Tile properties")]
     [MonoMod.MonoModIgnore]
-    void ITileProperties(ModFwModder modder)
+    static void ITileProperties(ModFwModder modder)
     {
         var tile = modder.GetDefinition<Terraria.Tile>();
         tile.RemapFieldsToProperties(modder);

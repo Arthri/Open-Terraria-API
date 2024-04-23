@@ -31,7 +31,7 @@ class B384680188CA4A9083017801C2A34C95
     /// </summary>
     [Modification(ModType.PreMerge, "Allowing GetData exceptions debugging")]
     [MonoMod.MonoModIgnore]
-    void ClientGetDataExceptions(ModFramework.ModFwModder modder)
+    static void ClientGetDataExceptions(ModFramework.ModFwModder modder)
     {
         var csr = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));
 
