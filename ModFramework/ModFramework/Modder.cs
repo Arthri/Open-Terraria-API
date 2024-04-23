@@ -103,6 +103,13 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
                 foreach (var parameter in method.Parameters)
                     RunTasks(t => t.Relink(method, parameter));
 
+            if (method.Body?.Instructions.Count > 0)
+                for (int i = 0; i < method.Body.Instructions.Count; i++)
+                {
+                    var instruction = method.Body.Instructions[i];
+                    RunTasks(t => t.Relink(method.Body, instruction));
+                }
+
             OnRewritingMethod?.Invoke(modder, method);
         };
         MethodBodyRewriter = (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
@@ -207,6 +214,10 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
 
     public override void PatchRefsInMethod(MethodDefinition method)
     {
+        // This has to be run before MonoMod relinks
+        // otherwise we'll end up with broken references
+        RunTasks(t => t.Relink(method));
+
         base.PatchRefsInMethod(method);
 
         RunTasks(t => t.Relink(method));
@@ -231,6 +242,8 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
                 if (asmref.Name.Equals(relinked.Key))
                     Module.AssemblyReferences.Remove(asmref);
         }
+
+        base.PatchRefs();
     }
 
     public void RelinkAssembly(string fromAssemblyName, ModuleDefinition? toModule = null)
