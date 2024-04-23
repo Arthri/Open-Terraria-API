@@ -42,7 +42,7 @@ file static class B384680188CA4A9083017801C2A34C95
     }
 
     [MonoModIgnore]
-    void HookMethod(MonoModder modder, Expression<Action> method, Func<bool, float, float, int, int, int, int, bool> Callback)
+    static void HookMethod(MonoModder modder, Expression<Action> method, Func<bool, float, float, int, int, int, int, bool> Callback)
     {
         var csr = modder.GetILCursor(method);
 
