@@ -54,28 +54,5 @@ class B384680188CA4A9083017801C2A34C95
             modder.Module.Resources.Single(x => x.Name.EndsWith("Newtonsoft.Json.dll"))
         );
     }
-
-    [Modification(ModType.PreMerge, "Deduplicating Newtonsoft.Json references")]
-    void DeduplicateNewtonsoftJson(MonoModder modder)
-    {
-        AssemblyNameReference firstFound = null;
-        var referencesToRemove = new List<AssemblyNameReference>();
-        foreach (var reference in modder.Module.AssemblyReferences)
-        {
-            if (firstFound is null)
-            {
-                firstFound = reference;
-            }
-            else
-            {
-                referencesToRemove.Add(reference);
-            }
-        }
-
-        foreach (var reference in referencesToRemove)
-        {
-            modder.Module.AssemblyReferences.Remove(reference);
-        }
-    }
 }
 #endif

@@ -40,8 +40,6 @@ public class TMLPCServerTarget : PCServerTarget
 
     public TMLPCServerTarget()
     {
-        // deletes Terraria.ModLoader.MonoModHooks and breaks tML
-        Environment.SetEnvironmentVariable("MONOMOD_CLEANUP_ALL", "0");
     }
 
     public override void AddSearchDirectories(ModFwModder modder)
