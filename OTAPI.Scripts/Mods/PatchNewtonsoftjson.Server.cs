@@ -24,6 +24,7 @@ System.Console.WriteLine("Newtonsoft.Json upgrade not needed on TML1.4");
 using ModFramework;
 using Mono.Cecil;
 using MonoMod;
+using System.Collections.Generic;
 using System.Linq;
 
 [MonoMod.MonoModIgnore]
