@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 System.Console.WriteLine("Newtonsoft.Json upgrade not needed on TML1.4");
 #else
 using ModFramework;
+using Mono.Cecil;
 using MonoMod;
 using System.Linq;
 
