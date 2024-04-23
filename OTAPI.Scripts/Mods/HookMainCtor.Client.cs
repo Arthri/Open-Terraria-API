@@ -25,7 +25,7 @@ using Mono.Cecil.Cil;
 using MonoMod;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Creates Hooks.Main.Create. Allows plugins to extend and return a custom Terraria.Main instance.
@@ -34,11 +34,11 @@ class B384680188CA4A9083017801C2A34C95
     [MonoMod.MonoModIgnore]
     static void HookMainCtor(MonoModder modder)
     {
-Terraria_1442_OrAbove
+#if Terraria_1442_OrAbove
         var LaunchGame = modder.GetILCursor(() => Terraria.Program.RunGame());
-e
+#else
         var LaunchGame = modder.GetILCursor(() => Terraria.Program.LaunchGame(null, false));
-if
+#endif
 
         var createGame = modder.GetMethodDefinition(() => OTAPI.Hooks.Main.InvokeCreate());
 

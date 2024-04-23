@@ -26,7 +26,7 @@ using System;
 using System.Collections.Generic;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Patch in a custom Terraria.RemoteClient.ClientUUID property, and hooks it up into the network protocol.

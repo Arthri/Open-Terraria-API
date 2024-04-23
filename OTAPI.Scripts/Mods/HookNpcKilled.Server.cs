@@ -26,7 +26,7 @@ using Mono.Cecil.Cil;
 using MonoMod;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Creates Hooks.NPC.Killed. Allows plugins to cancel NPC killed events.

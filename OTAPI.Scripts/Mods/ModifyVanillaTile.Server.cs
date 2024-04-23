@@ -27,7 +27,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Implements Terraria.Tile.Initialise in place of Terraria.Tile.ctor. This allows the port to an interface work much easier.

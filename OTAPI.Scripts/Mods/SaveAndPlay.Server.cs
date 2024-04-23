@@ -24,7 +24,7 @@ using MonoMod;
 using System.Linq;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Adds a Terraria.WorldGen.autoSave check in saveAndPlay

@@ -30,7 +30,7 @@ using System.Linq;
 using Mono.Cecil.Rocks;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Removes sync lock functionality in Terraria.NetMessage.SendData, used in conjunction with the SendDataWriter patch.
@@ -81,7 +81,7 @@ class B384680188CA4A9083017801C2A34C95
     }
 
     [MonoMod.MonoModIgnore]
-    ILCount FindStartOfLock(ILCursor cursor, ExceptionHandler exlock)
+    static ILCount FindStartOfLock(ILCursor cursor, ExceptionHandler exlock)
     {
         cursor.Goto(exlock.TryStart);
 
@@ -99,7 +99,7 @@ class B384680188CA4A9083017801C2A34C95
     }
 
     [MonoMod.MonoModIgnore]
-    IEnumerable<ExceptionHandler> FindLocks(ILCursor cursor)
+    static IEnumerable<ExceptionHandler> FindLocks(ILCursor cursor)
     {
         // look for all endfinally instructions, and if the previous instruction is a Monitor.Exit we can assume it's a lock
 

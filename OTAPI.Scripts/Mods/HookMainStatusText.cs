@@ -27,7 +27,7 @@ using Mono.Cecil;
 using System;
 
 [MonoMod.MonoModIgnore]
-class B384680188CA4A9083017801C2A34C95
+file static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc A mod to create Hooks.Main.StatusTextUpdate. Allows plugins to receive writes to Main.statusText.
