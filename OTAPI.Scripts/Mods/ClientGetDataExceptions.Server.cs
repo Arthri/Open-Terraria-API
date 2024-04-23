@@ -23,35 +23,39 @@ using System.Linq;
 using ModFramework;
 using Mono.Cecil.Cil;
 
-/// <summary>
-/// @doc A mod to insert Hooks.NetMessage.CheckBytesException and will default to printing to the console
-/// </summary>
-[Modification(ModType.PreMerge, "Allowing GetData exceptions debugging")]
 [MonoMod.MonoModIgnore]
-void ClientGetDataExceptions(ModFramework.ModFwModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    var csr = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));
+    /// <summary>
+    /// @doc A mod to insert Hooks.NetMessage.CheckBytesException and will default to printing to the console
+    /// </summary>
+    [Modification(ModType.PreMerge, "Allowing GetData exceptions debugging")]
+    [MonoMod.MonoModIgnore]
+    static void ClientGetDataExceptions(ModFramework.ModFwModder modder)
+    {
+        var csr = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));
 
-    var handler = csr.Body.ExceptionHandlers.Single(x => x.HandlerType == ExceptionHandlerType.Catch);
+        var handler = csr.Body.ExceptionHandlers.Single(x => x.HandlerType == ExceptionHandlerType.Catch);
 
-    var exType = modder.Module.ImportReference(
-        typeof(Exception)
-    );
-    var exVariable = new VariableDefinition(exType);
+        var exType = modder.Module.ImportReference(
+            typeof(Exception)
+        );
+        var exVariable = new VariableDefinition(exType);
 
-    csr.Body.Variables.Add(exVariable);
+        csr.Body.Variables.Add(exVariable);
 
-    handler.CatchType = modder.Module.ImportReference(
-        typeof(Exception)
-    );
+        handler.CatchType = modder.Module.ImportReference(
+            typeof(Exception)
+        );
 
-    handler.HandlerStart.OpCode = OpCodes.Stloc;
-    handler.HandlerStart.Operand = exVariable;
+        handler.HandlerStart.OpCode = OpCodes.Stloc;
+        handler.HandlerStart.Operand = exVariable;
 
-    csr.Goto(handler.HandlerEnd.Previous(x => x.OpCode == OpCodes.Leave_S), MonoMod.Cil.MoveType.Before);
+        csr.Goto(handler.HandlerEnd.Previous(x => x.OpCode == OpCodes.Leave_S), MonoMod.Cil.MoveType.Before);
 
-    csr.Emit(OpCodes.Ldloc, exVariable);
-    csr.EmitDelegate(OTAPI.Hooks.NetMessage.InvokeCheckBytesException);
+        csr.Emit(OpCodes.Ldloc, exVariable);
+        csr.EmitDelegate(OTAPI.Hooks.NetMessage.InvokeCheckBytesException);
+    }
 }
 
 namespace OTAPI

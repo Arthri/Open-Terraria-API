@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0436 // Type conflicts with imported type
 
 #if tModLoaderServer_V1_3 || tModLoader_V1_4
-System.Console.WriteLine("Npc loot not available in TML");
+#warning Npc loot not available in TML
 #else
 using System;
 using ModFramework;
@@ -28,25 +28,29 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.DropLoot. Allows plugins to alter or cancel NPC loot drops.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC")]
 [MonoMod.MonoModIgnore]
-void HookNpcLoot(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    var NewNPC = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC(default, default, default, default));
+    /// <summary>
+    /// @doc Creates Hooks.NPC.DropLoot. Allows plugins to alter or cancel NPC loot drops.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC")]
+    [MonoMod.MonoModIgnore]
+    static void HookNpcLoot(MonoModder modder)
+    {
+        var NewNPC = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemFromNPC(default, default, default, default));
 
-    NewNPC.GotoNext(
-        i => i.OpCode == OpCodes.Call && i.Operand is MethodReference methodReference && methodReference.Name == "NewItem" && methodReference.DeclaringType.FullName == "Terraria.Item"
-    );
+        NewNPC.GotoNext(
+            i => i.OpCode == OpCodes.Call && i.Operand is MethodReference methodReference && methodReference.Name == "NewItem" && methodReference.DeclaringType.FullName == "Terraria.Item"
+        );
 
-    NewNPC.Emit(OpCodes.Ldarg_0); // NPC instance
+        NewNPC.Emit(OpCodes.Ldarg_0); // NPC instance
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
-    NewNPC.Next.Operand = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeDropLoot(default, default, default, default, default, default, default, default, default, default, default, default));
+        NewNPC.Next.Operand = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeDropLoot(default, default, default, default, default, default, default, default, default, default, default, default));
 #else
-    NewNPC.Next.Operand = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeDropLoot(default, default, default, default, default, default, default, default, default, default, default));
+        NewNPC.Next.Operand = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeDropLoot(default, default, default, default, default, default, default, default, default, default, default));
 #endif
+    }
 }
 
 namespace OTAPI

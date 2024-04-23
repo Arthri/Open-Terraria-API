@@ -19,19 +19,23 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoader_V1_4
-System.Console.WriteLine("ITile not available in TML");
+#warning ITile not available in TML
 #else
 using ModFramework;
 using ModFramework.Relinker;
 
-/// <summary>
-/// @doc Transforms Terraria.Tile[] types to ModFramework.DefaultCollection
-/// </summary>
-[Modification(ModType.PreMerge, "Implementing Tile collections")]
 [MonoMod.MonoModIgnore]
-void ITileCollection(ModFwModder modder, IRelinkProvider relinkProvider)
+static class B384680188CA4A9083017801C2A34C95
 {
-    var tile = modder.GetDefinition<Terraria.Tile>();
-    tile.RelinkAsCollection(modder);
+    /// <summary>
+    /// @doc Transforms Terraria.Tile[] types to ModFramework.DefaultCollection
+    /// </summary>
+    [Modification(ModType.PreMerge, "Implementing Tile collections")]
+    [MonoMod.MonoModIgnore]
+    static void ITileCollection(ModFwModder modder, IRelinkProvider relinkProvider)
+    {
+        var tile = modder.GetDefinition<Terraria.Tile>();
+        tile.RelinkAsCollection(modder);
+    }
 }
 #endif

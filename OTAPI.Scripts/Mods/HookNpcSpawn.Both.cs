@@ -26,29 +26,33 @@ using MonoMod;
 using System;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.Spawn. Allows plugins to cancel NPC spawns.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Spawn)")]
-[MonoModIgnore]
-void HookNpcSpawn(MonoModder modder)
+[MonoMod.MonoModIgnore]
+static class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Creates Hooks.NPC.Spawn. Allows plugins to cancel NPC spawns.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Spawn)")]
+    [MonoModIgnore]
+    static void HookNpcSpawn(MonoModder modder)
+    {
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
-    var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default, default));
+        var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default, default));
 #else
-    var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default));
+        var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default));
 #endif
 
-    NewNPC.GotoNext(
-        i => i.OpCode == OpCodes.Stfld && i.Operand is FieldReference fieldReference && fieldReference.Name == "target" && fieldReference.DeclaringType.FullName == "Terraria.NPC"
-    );
-    NewNPC.Index++;
+        NewNPC.GotoNext(
+            i => i.OpCode == OpCodes.Stfld && i.Operand is FieldReference fieldReference && fieldReference.Name == "target" && fieldReference.DeclaringType.FullName == "Terraria.NPC"
+        );
+        NewNPC.Index++;
 
-    NewNPC.Emit(OpCodes.Ldloca, NewNPC.Body.Variables.First());
-    NewNPC.EmitDelegate(OTAPI.Hooks.NPC.InvokeSpawn);
-    NewNPC.Emit(OpCodes.Brtrue_S, NewNPC.Instrs[NewNPC.Index]);
-    NewNPC.Emit(OpCodes.Ldloc, NewNPC.Body.Variables.First());
-    NewNPC.Emit(OpCodes.Ret);
+        NewNPC.Emit(OpCodes.Ldloca, NewNPC.Body.Variables.First());
+        NewNPC.EmitDelegate(OTAPI.Hooks.NPC.InvokeSpawn);
+        NewNPC.Emit(OpCodes.Brtrue_S, NewNPC.Instrs[NewNPC.Index]);
+        NewNPC.Emit(OpCodes.Ldloc, NewNPC.Body.Variables.First());
+        NewNPC.Emit(OpCodes.Ret);
+    }
 }
 
 namespace OTAPI

@@ -26,49 +26,53 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Hooks.Wiring.AnnouncementBox. Allows plu
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking wiring announce box")]
 [MonoMod.MonoModIgnore]
-void HookWiringAnnounceBox(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Creates Hooks.Wiring.AnnouncementBox. Allows plu
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking wiring announce box")]
+    [MonoMod.MonoModIgnore]
+    static void HookWiringAnnounceBox(MonoModder modder)
+    {
 #if tModLoader_V1_4
-    var mth = modder.Module.GetType("Terraria.Wiring").Methods.Single(m => m.Name == "HitWireSingle");
-    var csr = modder.GetILCursor(mth);
+        var mth = modder.Module.GetType("Terraria.Wiring").Methods.Single(m => m.Name == "HitWireSingle");
+        var csr = modder.GetILCursor(mth);
 #else
-    var csr = modder.GetILCursor(() => Terraria.Wiring.HitWireSingle(0, 0));
+        var csr = modder.GetILCursor(() => Terraria.Wiring.HitWireSingle(0, 0));
 #endif
 
-    if (csr.Method.Parameters.Count != 2)
-        throw new NotSupportedException("Expected 2 parameters for the callback");
+        if (csr.Method.Parameters.Count != 2)
+            throw new NotSupportedException("Expected 2 parameters for the callback");
 
-    var insertionPoint = csr.Body.Instructions.First(
-        x => x.OpCode == OpCodes.Ldsfld
-        && (x.Operand as FieldReference).Name == "AnnouncementBoxRange"
-    );
+        var insertionPoint = csr.Body.Instructions.First(
+            x => x.OpCode == OpCodes.Ldsfld
+            && (x.Operand as FieldReference).Name == "AnnouncementBoxRange"
+        );
 
-    var signVariable = csr.Body.Instructions.First(
-        x => x.OpCode == OpCodes.Call
-        && (x.Operand as MethodReference).Name == "ReadSign"
-    ).Next.Operand;
+        var signVariable = csr.Body.Instructions.First(
+            x => x.OpCode == OpCodes.Call
+            && (x.Operand as MethodReference).Name == "ReadSign"
+        ).Next.Operand;
 
-    csr.Goto(insertionPoint, MonoMod.Cil.MoveType.Before);
+        csr.Goto(insertionPoint, MonoMod.Cil.MoveType.Before);
 
-    var injectedInstructions = csr.EmitAll(
-        new { OpCodes.Ldarg_0 },
-        new { OpCodes.Ldarg_1 },
-        new { OpCodes.Ldloc_S, Operand = signVariable as VariableDefinition }
-    );
+        var injectedInstructions = csr.EmitAll(
+            new { OpCodes.Ldarg_0 },
+            new { OpCodes.Ldarg_1 },
+            new { OpCodes.Ldloc_S, Operand = signVariable as VariableDefinition }
+        );
 
-    csr.EmitDelegate(OTAPI.Hooks.Wiring.InvokeAnnouncementBox);
+        csr.EmitDelegate(OTAPI.Hooks.Wiring.InvokeAnnouncementBox);
 
-    insertionPoint.ReplaceTransfer(injectedInstructions.First(), csr.Method);
+        insertionPoint.ReplaceTransfer(injectedInstructions.First(), csr.Method);
 
-    csr.EmitAll(
-        new { OpCodes.Brtrue_S, insertionPoint },
-        new { OpCodes.Ret }
-    );
+        csr.EmitAll(
+            new { OpCodes.Brtrue_S, insertionPoint },
+            new { OpCodes.Ret }
+        );
+    }
 }
 
 namespace OTAPI

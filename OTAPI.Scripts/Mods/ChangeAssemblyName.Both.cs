@@ -21,30 +21,33 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 using ModFramework;
 using MonoMod;
 
-/// <summary>
-/// @doc A mod to change the Terraria or TerrariaServer name to OTAPI so cross platform plugins only need to reference one assembly name
-/// </summary>
-[Modification(ModType.PostPatch, "Changing assembly name to OTAPI", ModPriority.Last)]
 [MonoMod.MonoModIgnore]
-void ChangeAssemblyName(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    foreach (var asmref in modder.Module.AssemblyReferences)
+    /// <summary>
+    /// @doc A mod to change the Terraria or TerrariaServer name to OTAPI so cross platform plugins only need to reference one assembly name
+    /// </summary>
+    [Modification(ModType.PostPatch, "Changing assembly name to OTAPI", ModPriority.Last)]
+    static void ChangeAssemblyName(MonoModder modder)
     {
-        if (asmref.Name == "Terraria" || asmref.Name == "TerrariaServer" || asmref.Name == "tModLoader")
+        foreach (var asmref in modder.Module.AssemblyReferences)
         {
-            var from = asmref.Name;
-            modder.Log($"[OTAPI] RelinkModule: {from} -> {modder.Module.Name}");
-            modder.RelinkModuleMap[from] = modder.Module;
-            modder.RelinkModuleMap["OTAPI"] = modder.Module;
+            if (asmref.Name == "Terraria" || asmref.Name == "TerrariaServer" || asmref.Name == "tModLoader")
+            {
+                var from = asmref.Name;
+                modder.Log($"[OTAPI] RelinkModule: {from} -> {modder.Module.Name}");
+                modder.RelinkModuleMap[from] = modder.Module;
+                modder.RelinkModuleMap["OTAPI"] = modder.Module;
 
-            asmref.Name = "OTAPI";
+                asmref.Name = "OTAPI";
+            }
         }
-    }
-    modder.Module.Name = modder.Module.Assembly.Name.Name = "OTAPI";
+        modder.Module.Name = modder.Module.Assembly.Name.Name = "OTAPI";
 
-    (modder.AssemblyResolver as Mono.Cecil.DefaultAssemblyResolver).ResolveFailure += (s, e) =>
-    {
-        if (e.Name == "OTAPI") return modder.Module.Assembly;
-        return null;
-    };
+        (modder.AssemblyResolver as Mono.Cecil.DefaultAssemblyResolver).ResolveFailure += (s, e) =>
+        {
+            if (e.Name == "OTAPI") return modder.Module.Assembly;
+            return null;
+        };
+    }
 }

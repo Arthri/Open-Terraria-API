@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using ModFramework;
 using OTAPI.Patcher.Resolvers;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -36,6 +37,10 @@ public class TMLPCServerTarget : PCServerTarget
 
     public override bool PublicEverything => false; // tml expects various classes to still be private
     public override bool GenerateSymbols => false; // write currently throws an exception. havent had the chance to fix the problem yet
+
+    public TMLPCServerTarget()
+    {
+    }
 
     public override void AddSearchDirectories(ModFwModder modder)
     {

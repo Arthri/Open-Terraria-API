@@ -19,22 +19,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoaderServer_V1_3
-System.Console.WriteLine("RemoveMap not available in TML1.3. Might be future support, depends if mods need to extend this for client related mods.");
+#warning RemoveMap not available in TML1.3. Might be future support, depends if mods need to extend this for client related mods.
 #else
 using ModFramework;
 using MonoMod;
 
-/// <summary>
-/// @doc Disables the world map to be created on the server (it is not needed, at least on vanilla).
-/// </summary>
-[Modification(ModType.PreMerge, "Removing world map")]
 [MonoMod.MonoModIgnore]
-void RemoveMap(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-	var worldMap = modder.GetDefinition<Terraria.Map.WorldMap>();
-	foreach (var method in worldMap.Methods)
+	/// <summary>
+	/// @doc Disables the world map to be created on the server (it is not needed, at least on vanilla).
+	/// </summary>
+	[Modification(ModType.PreMerge, "Removing world map")]
+	[MonoMod.MonoModIgnore]
+	static void RemoveMap(MonoModder modder)
 	{
-		method.ClearBody();
+		var worldMap = modder.GetDefinition<Terraria.Map.WorldMap>();
+		foreach (var method in worldMap.Methods)
+		{
+			method.ClearBody();
+		}
 	}
 }
 #endif

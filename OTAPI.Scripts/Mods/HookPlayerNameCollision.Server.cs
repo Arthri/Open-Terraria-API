@@ -25,27 +25,31 @@ using ModFramework;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Hooks.MessageBuffer.NameCollision. Allows plugins to control and cancel name collisions when 2 players join with the same name.
-/// </summary>
-[Modification(ModType.PrePatch, "Hooking player name collisions")]
 [MonoMod.MonoModIgnore]
-void HookPlayerNameCollision(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    int tmp;
-    var csr = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out tmp));
+    /// <summary>
+    /// @doc Creates Hooks.MessageBuffer.NameCollision. Allows plugins to control and cancel name collisions when 2 players join with the same name.
+    /// </summary>
+    [Modification(ModType.PrePatch, "Hooking player name collisions")]
+    [MonoMod.MonoModIgnore]
+    static void HookPlayerNameCollision(MonoModder modder)
+    {
+        int tmp;
+        var csr = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out tmp));
 
-    var flag = csr.Body.Instructions
-        .Single(x => x.OpCode == OpCodes.Ldstr && x.Operand.Equals("Net.NameTooLong"))
-        .Previous(y => y.OpCode == OpCodes.Brfalse_S);
+        var flag = csr.Body.Instructions
+            .Single(x => x.OpCode == OpCodes.Ldstr && x.Operand.Equals("Net.NameTooLong"))
+            .Previous(y => y.OpCode == OpCodes.Brfalse_S);
 
-    var player = flag.Next(x => x.OpCode == OpCodes.Ldloc_S);
+        var player = flag.Next(x => x.OpCode == OpCodes.Ldloc_S);
 
-    csr.Goto(flag, MonoMod.Cil.MoveType.After);
+        csr.Goto(flag, MonoMod.Cil.MoveType.After);
 
-    csr.Emit(OpCodes.Ldloc_S, player.Operand as VariableDefinition);
-    csr.EmitDelegate(OTAPI.Hooks.MessageBuffer.InvokeNameCollision);
-    csr.Emit(OpCodes.Brfalse_S, flag.Operand as Instruction);
+        csr.Emit(OpCodes.Ldloc_S, player.Operand as VariableDefinition);
+        csr.EmitDelegate(OTAPI.Hooks.MessageBuffer.InvokeNameCollision);
+        csr.Emit(OpCodes.Brfalse_S, flag.Operand as Instruction);
+    }
 }
 
 namespace OTAPI

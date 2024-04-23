@@ -23,19 +23,23 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using System.Linq;
 
-/// <summary>
-/// @doc Adds a Terraria.WorldGen.autoSave check in saveAndPlay
-/// </summary>
-[Modification(ModType.PreMerge, "Adding autoSave check to saveAndPlay")]
 [MonoMod.MonoModIgnore]
-void SaveAndPlay(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    var vanilla = modder.GetILCursor(() => Terraria.WorldGen.saveAndPlay());
-    var autoSave = modder.GetFieldDefinition(() => Terraria.Main.autoSave);
+    /// <summary>
+    /// @doc Adds a Terraria.WorldGen.autoSave check in saveAndPlay
+    /// </summary>
+    [Modification(ModType.PreMerge, "Adding autoSave check to saveAndPlay")]
+    [MonoMod.MonoModIgnore]
+    static void SaveAndPlay(MonoModder modder)
+    {
+        var vanilla = modder.GetILCursor(() => Terraria.WorldGen.saveAndPlay());
+        var autoSave = modder.GetFieldDefinition(() => Terraria.Main.autoSave);
 
-    var first_instruction = vanilla.Body.Instructions.First();
-    vanilla.Goto(first_instruction);
-    vanilla.Emit(OpCodes.Ldsfld, autoSave);
-    vanilla.Emit(OpCodes.Brtrue, first_instruction);
-    vanilla.Emit(OpCodes.Ret);
+        var first_instruction = vanilla.Body.Instructions.First();
+        vanilla.Goto(first_instruction);
+        vanilla.Emit(OpCodes.Ldsfld, autoSave);
+        vanilla.Emit(OpCodes.Brtrue, first_instruction);
+        vanilla.Emit(OpCodes.Ret);
+    }
 }

@@ -20,14 +20,18 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using ModFramework;
 
-/// <summary>
-/// @doc Patches FileOperationAPIWrapper.SHFILEOPSTRUCT to work for x64
-/// </summary>
-[Modification(ModType.PreMerge, "Patching FileOperationAPIWrapper.SHFILEOPSTRUCT to work for x64")]
 [MonoMod.MonoModIgnore]
-void ModifyFileOperationAPIWrapper(ModFwModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    // windows only mod, but tls needs a Main()
-    var type = modder.Module.GetType("Terraria.Utilities.FileOperationAPIWrapper/SHFILEOPSTRUCT");
-    if (type is not null) type.PackingSize = 0;
+    /// <summary>
+    /// @doc Patches FileOperationAPIWrapper.SHFILEOPSTRUCT to work for x64
+    /// </summary>
+    [Modification(ModType.PreMerge, "Patching FileOperationAPIWrapper.SHFILEOPSTRUCT to work for x64")]
+    [MonoMod.MonoModIgnore]
+    static void ModifyFileOperationAPIWrapper(ModFwModder modder)
+    {
+        // windows only mod, but tls needs a Main()
+        var type = modder.Module.GetType("Terraria.Utilities.FileOperationAPIWrapper/SHFILEOPSTRUCT");
+        if (type is not null) type.PackingSize = 0;
+    }
 }

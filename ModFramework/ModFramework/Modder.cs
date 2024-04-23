@@ -103,6 +103,13 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
                 foreach (var parameter in method.Parameters)
                     RunTasks(t => t.Relink(method, parameter));
 
+            if (method.Body?.Instructions.Count > 0)
+                for (int i = 0; i < method.Body.Instructions.Count; i++)
+                {
+                    var instruction = method.Body.Instructions[i];
+                    RunTasks(t => t.Relink(method.Body, instruction));
+                }
+
             OnRewritingMethod?.Invoke(modder, method);
         };
         MethodBodyRewriter = (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
@@ -110,6 +117,11 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
             RunTasks(t => t.Relink(body, instr));
             OnRewritingMethodBody?.Invoke(modder, body, instr, instri);
         };
+        // Needed because MonoMod throws an NRE
+        // as it tries to read a null Scope
+        ShouldCleanupAttrib = (mtp, attribType) => 
+            attribType.Scope?.Name is "MonoMod" or "MonoMod.exe" or "MonoMod.dll"
+            || attribType.FullName.StartsWith("MonoMod.MonoMod", StringComparison.Ordinal);
 
         AddTask<EventDelegateRelinker>();
     }
@@ -207,6 +219,16 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
 
     public override void PatchRefsInMethod(MethodDefinition method)
     {
+        // This has to be run before MonoMod relinks
+        // otherwise we'll end up with broken references
+        foreach (var task in TaskList)
+        {
+            if (task is CoreLibRelinker)
+            {
+                task.Relink(method);
+            }
+        }
+
         base.PatchRefsInMethod(method);
 
         RunTasks(t => t.Relink(method));
@@ -231,6 +253,8 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
                 if (asmref.Name.Equals(relinked.Key))
                     Module.AssemblyReferences.Remove(asmref);
         }
+
+        base.PatchRefs();
     }
 
     public void RelinkAssembly(string fromAssemblyName, ModuleDefinition? toModule = null)

@@ -19,20 +19,24 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoader_V1_4
-System.Console.WriteLine("ReLogic Embedded Resource patch not available in TML1.4");
+#warning ReLogic Embedded Resource patch not available in TML1.4
 #else
 using ModFramework;
 using MonoMod;
 using System.Linq;
 
-/// <summary>
-/// @doc Removes ReLogic.dll from embedded resources as its replaced
-/// </summary>
-[Modification(ModType.PreMerge, "Removing ReLogic Embedded Resource")]
 [MonoMod.MonoModIgnore]
-void RemoveReLogicResource(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-	var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("ReLogic.dll", System.StringComparison.CurrentCultureIgnoreCase));
-	modder.Module.Resources.Remove(sw);
+	/// <summary>
+	/// @doc Removes ReLogic.dll from embedded resources as its replaced
+	/// </summary>
+	[Modification(ModType.PreMerge, "Removing ReLogic Embedded Resource")]
+	[MonoMod.MonoModIgnore]
+	static void RemoveReLogicResource(MonoModder modder)
+	{
+		var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("ReLogic.dll", System.StringComparison.CurrentCultureIgnoreCase));
+		modder.Module.Resources.Remove(sw);
+	}
 }
 #endif

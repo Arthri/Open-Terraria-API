@@ -53,6 +53,10 @@ jobs:
         run: |
           (cd OTAPI.Patcher && exec dotnet run -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
 
+      - name: Check Assembly
+        run: |
+          (cd OTAPI.Patcher/bin/Debug/net6.0/ && exec dotnet run --project ../../../../AsmAnalyzer/ OTAPI.dll)
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.profile.name }} NuGet Package

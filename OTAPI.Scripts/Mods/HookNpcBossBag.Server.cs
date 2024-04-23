@@ -25,47 +25,51 @@ using ModFramework;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.BossBag. Allows plugins to cancel boss bag items.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking npc boss bags")]
 [MonoMod.MonoModIgnore]
-void HookNpcBossBag(ModFramework.ModFwModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    // replace NewItem calls, and handle the -1 result to cancel the method from actioning.
+    /// <summary>
+    /// @doc Creates Hooks.NPC.BossBag. Allows plugins to cancel boss bag items.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking npc boss bags")]
+    [MonoMod.MonoModIgnore]
+    static void HookNpcBossBag(ModFramework.ModFwModder modder)
+    {
+        // replace NewItem calls, and handle the -1 result to cancel the method from actioning.
 
-    var csr = modder.GetILCursor(() => (new Terraria.NPC()).DropItemInstanced(default, default, 0, 0, false));
-    var callback = csr.Module.ImportReference(
+        var csr = modder.GetILCursor(() => (new Terraria.NPC()).DropItemInstanced(default, default, 0, 0, false));
+        var callback = csr.Module.ImportReference(
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
-        modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeBossBag(null, 0, 0, 0, 0, 0, 0, false, 0, false, false, null))
+            modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeBossBag(null, 0, 0, 0, 0, 0, 0, false, 0, false, false, null))
 #else
-        modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeBossBag(0, 0, 0, 0, 0, 0, false, 0, false, false, null))
+            modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeBossBag(0, 0, 0, 0, 0, 0, false, 0, false, false, null))
 #endif
-    );
+        );
 
-    var instructions = csr.Body.Instructions.Where(x => x.OpCode == OpCodes.Call
-                                                        && x.Operand is MethodReference mref && mref.Name == "NewItem"
-                                                        && x.Next.OpCode == OpCodes.Stloc_0);
+        var instructions = csr.Body.Instructions.Where(x => x.OpCode == OpCodes.Call
+                                                            && x.Operand is MethodReference mref && mref.Name == "NewItem"
+                                                            && x.Next.OpCode == OpCodes.Stloc_0);
 
-    if (instructions.Count() != 1) throw new NotSupportedException("Only one server NewItem call expected in DropBossBags.");
+        if (instructions.Count() != 1) throw new NotSupportedException("Only one server NewItem call expected in DropBossBags.");
 
-    var ins = instructions.First();
+        var ins = instructions.First();
 
-    ins.Operand = callback;
+        ins.Operand = callback;
 
-    csr.Goto(ins);
-    csr.EmitAll(
-        new { OpCodes.Ldarg_0 }
-    );
+        csr.Goto(ins);
+        csr.EmitAll(
+            new { OpCodes.Ldarg_0 }
+        );
 
-    csr.Goto(ins.Next.Next);
-    csr.EmitAll(
-        new { OpCodes.Ldloc_0 },
-        new { OpCodes.Ldc_I4_M1 },
-        new { OpCodes.Ceq },
-        new { OpCodes.Brfalse_S, Operand = ins.Next.Next },
-        new { OpCodes.Ret }
-    );
+        csr.Goto(ins.Next.Next);
+        csr.EmitAll(
+            new { OpCodes.Ldloc_0 },
+            new { OpCodes.Ldc_I4_M1 },
+            new { OpCodes.Ceq },
+            new { OpCodes.Brfalse_S, Operand = ins.Next.Next },
+            new { OpCodes.Ret }
+        );
+    }
 }
 
 namespace OTAPI

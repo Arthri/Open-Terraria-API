@@ -26,30 +26,34 @@ using MonoMod;
 using System;
 using Terraria.DataStructures;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.Create. Allows plugins to create NPC instances.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Create)")]
 [MonoMod.MonoModIgnore]
-void HookNpcCreate(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Creates Hooks.NPC.Create. Allows plugins to create NPC instances.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.NPC.NewNPC(Create)")]
+    [MonoMod.MonoModIgnore]
+    static void HookNpcCreate(MonoModder modder)
+    {
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
-    var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeCreate(default, default, default, default, default, default, default, default, default, default));
-    var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default, default));
+        var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeCreate(default, default, default, default, default, default, default, default, default, default));
+        var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default, default));
 #else
-    var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeCreate(default, default, default, default, default, default, default, default, default));
-    var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default));
+        var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NPC.InvokeCreate(default, default, default, default, default, default, default, default, default));
+        var NewNPC = modder.GetILCursor(() => Terraria.NPC.NewNPC(default, default, default, default, default, default, default, default, default));
 #endif
 
-    NewNPC.GotoNext(
-        i => i.OpCode == OpCodes.Newobj && i.Operand is MethodReference mr && mr.Name == ".ctor" && mr.DeclaringType.FullName == "Terraria.NPC"
-    );
+        NewNPC.GotoNext(
+            i => i.OpCode == OpCodes.Newobj && i.Operand is MethodReference mr && mr.Name == ".ctor" && mr.DeclaringType.FullName == "Terraria.NPC"
+        );
 
-    NewNPC.Next.OpCode = OpCodes.Call;
-    NewNPC.Next.Operand = callback;
+        NewNPC.Next.OpCode = OpCodes.Call;
+        NewNPC.Next.Operand = callback;
 
-    foreach (var prm in NewNPC.Method.Parameters)
-        NewNPC.Emit(OpCodes.Ldarg, prm);
+        foreach (var prm in NewNPC.Method.Parameters)
+            NewNPC.Emit(OpCodes.Ldarg, prm);
+    }
 }
 
 namespace OTAPI

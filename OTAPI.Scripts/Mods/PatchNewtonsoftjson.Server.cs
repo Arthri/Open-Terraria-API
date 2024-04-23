@@ -19,34 +19,40 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoader_V1_4
-System.Console.WriteLine("Newtonsoft.Json upgrade not needed on TML1.4");
+#warning Newtonsoft.Json upgrade not needed on TML1.4
 #else
 using ModFramework;
+using Mono.Cecil;
 using MonoMod;
+using System.Collections.Generic;
 using System.Linq;
 
-/// <summary>
-/// @doc A mod to update Newtonsoft.Json assembly references.
-/// </summary>
-[Modification(ModType.PostPatch, "Upgrading Newtonsoft.Json")]
 [MonoMod.MonoModIgnore]
-void PatchNewtonsoftJson(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-    var desired = typeof(Newtonsoft.Json.JsonConvert).Assembly.GetName().Version;
-
-    //Update the references to match what is installed
-    foreach (var reference in modder.Module.AssemblyReferences)
+    /// <summary>
+    /// @doc A mod to update Newtonsoft.Json assembly references.
+    /// </summary>
+    [Modification(ModType.PostPatch, "Upgrading Newtonsoft.Json")]
+    [MonoMod.MonoModIgnore]
+    static void PatchNewtonsoftJson(MonoModder modder)
     {
-        if (reference.Name == "Newtonsoft.Json")
-        {
-            reference.Version = desired;
-            break;
-        }
-    }
+        var desired = typeof(Newtonsoft.Json.JsonConvert).Assembly.GetName().Version;
 
-    //Remove the embedded Newtonsoft resource
-    modder.Module.Resources.Remove(
-        modder.Module.Resources.Single(x => x.Name.EndsWith("Newtonsoft.Json.dll"))
-    );
+        //Update the references to match what is installed
+        foreach (var reference in modder.Module.AssemblyReferences)
+        {
+            if (reference.Name == "Newtonsoft.Json")
+            {
+                reference.Version = desired;
+                break;
+            }
+        }
+
+        //Remove the embedded Newtonsoft resource
+        modder.Module.Resources.Remove(
+            modder.Module.Resources.Single(x => x.Name.EndsWith("Newtonsoft.Json.dll"))
+        );
+    }
 }
 #endif

@@ -22,20 +22,24 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 using ModFramework;
 using MonoMod;
 
-/// <summary>
-/// @doc Removes windows references from WeGame
-/// </summary>
-[Modification(ModType.PreMerge, "Removing WeGame windows calls")]
 [MonoMod.MonoModIgnore]
-void RemoveWeGame(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-	var ctr = modder.GetDefinition<Terraria.Social.WeGame.CurrentThreadRunner>();
-	ctr.Fields.Clear();
-	foreach (var method in ctr.Methods)
+	/// <summary>
+	/// @doc Removes windows references from WeGame
+	/// </summary>
+	[Modification(ModType.PreMerge, "Removing WeGame windows calls")]
+	[MonoMod.MonoModIgnore]
+	static void RemoveWeGame(MonoModder modder)
 	{
-		method.ClearBody();
+		var ctr = modder.GetDefinition<Terraria.Social.WeGame.CurrentThreadRunner>();
+		ctr.Fields.Clear();
+		foreach (var method in ctr.Methods)
+		{
+			method.ClearBody();
+		}
 	}
 }
 #else
-System.Console.WriteLine("WeGame patch not needed on TML1.4");
+#warning WeGame patch not needed on TML1.4
 #endif

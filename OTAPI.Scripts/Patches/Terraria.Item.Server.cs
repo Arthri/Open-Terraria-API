@@ -24,15 +24,15 @@ namespace Terraria
         }
 
         private extern void orig_SetDefaults(int Type, bool noMatCheck = false
-        #if !tModLoader_V1_4
+#if !tModLoader_V1_4
         , ItemVariant variant = null
-        #endif
+#endif
         );
 
         public new void SetDefaults(int Type, bool noMatCheck = false
-        #if !tModLoader_V1_4
+#if !tModLoader_V1_4
         , ItemVariant variant = null
-        #endif
+#endif
         )
         {
             var args = new SetDefaultsEventArgs
@@ -40,16 +40,16 @@ namespace Terraria
                 Item = this,
                 Type = Type,
                 NoMaterialCheck = noMatCheck,
-                #if !tModLoader_V1_4
+#if !tModLoader_V1_4
                 Variant = variant,
-                #endif
+#endif
             };
             if (PreSetDefaults?.Invoke(args) != OTAPI.HookResult.Cancel)
             {
                 orig_SetDefaults(args.Type, args.NoMaterialCheck
-                #if !tModLoader_V1_4
+#if !tModLoader_V1_4
                 , args.Variant
-                #endif
+#endif
                 );
                 PostSetDefaults?.Invoke(args);
             }
@@ -82,9 +82,9 @@ namespace OTAPI
 
                 public bool NoMaterialCheck { get; set; }
 
-                #if !tModLoader_V1_4
+#if !tModLoader_V1_4
                 public ItemVariant Variant { get; set; }
-                #endif
+#endif
             }
 
             public static PreHookHandler<SetDefaultsEventArgs>? PreSetDefaults;

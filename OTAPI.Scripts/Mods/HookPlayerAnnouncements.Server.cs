@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS0436 // Type conflicts with imported type
 
 #if tModLoaderServer_V1_3
-System.Console.WriteLine("Player announce not available in TML1.3");
+#warning Player announce not available in TML1.3
 #else
 using System;
 using System.Linq;
@@ -31,39 +31,43 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using Terraria.Localization;
 
-/// <summary>
-/// @doc Creates Hooks.NetMessage.PlayerAnnounce. Allows plugins to intercept the vanilla join message.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking player announcements (has join, has left)")]
 [MonoMod.MonoModIgnore]
-void HookPlayerAnnouncements(ModFwModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-#if tModLoader_V1_4
-    var mth = modder.Module.GetType("Terraria.NetMessage").Methods.Single(m => m.Name == "SyncOnePlayer");
-    var syncOne = modder.GetReference(mth);
-#else
-    var syncOne = modder.GetReference(() => Terraria.NetMessage.SyncOnePlayer(0, 0, 0));
-#endif
-    var broadcast = modder.GetReference(() => Terraria.Chat.ChatHelper.BroadcastChatMessage(null, default, 0));
-    var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NetMessage.InvokePlayerAnnounce(null, default, 0, 0, 0, 0));
-
-    modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
+    /// <summary>
+    /// @doc Creates Hooks.NetMessage.PlayerAnnounce. Allows plugins to intercept the vanilla join message.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking player announcements (has join, has left)")]
+    [MonoMod.MonoModIgnore]
+    static void HookPlayerAnnouncements(ModFwModder modder)
     {
-        if (instr.Operand is MethodReference mref
-            && mref.FullName == broadcast.FullName
-            && body.Method.FullName == syncOne.FullName
-        )
+#if tModLoader_V1_4
+        var mth = modder.Module.GetType("Terraria.NetMessage").Methods.Single(m => m.Name == "SyncOnePlayer");
+        var syncOne = modder.GetReference(mth);
+#else
+        var syncOne = modder.GetReference(() => Terraria.NetMessage.SyncOnePlayer(0, 0, 0));
+#endif
+        var broadcast = modder.GetReference(() => Terraria.Chat.ChatHelper.BroadcastChatMessage(null, default, 0));
+        var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.NetMessage.InvokePlayerAnnounce(null, default, 0, 0, 0, 0));
+
+        modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
         {
-            foreach (var prm in body.Method.Parameters)
-                body.GetILProcessor().InsertBefore(instr, Instruction.Create(OpCodes.Ldarg, prm));
-            instr.Operand = callback;
+            if (instr.Operand is MethodReference mref
+                && mref.FullName == broadcast.FullName
+                && body.Method.FullName == syncOne.FullName
+            )
+            {
+                foreach (var prm in body.Method.Parameters)
+                    body.GetILProcessor().InsertBefore(instr, Instruction.Create(OpCodes.Ldarg, prm));
+                instr.Operand = callback;
 
-            if (!(instr.Next.Operand is FieldReference fieldref && fieldref.Name == "dedServ"))
-                throw new Exception("Expected to replace dedServ calls with the player announce hook.");
+                if (!(instr.Next.Operand is FieldReference fieldref && fieldref.Name == "dedServ"))
+                    throw new Exception("Expected to replace dedServ calls with the player announce hook.");
 
-            body.GetILProcessor().Remove(instr.Next); // no need for this dedServ check
-        }
-    };
+                body.GetILProcessor().Remove(instr.Next); // no need for this dedServ check
+            }
+        };
+    }
 }
 
 namespace OTAPI

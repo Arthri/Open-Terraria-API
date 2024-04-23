@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if tModLoader_V1_4
-System.Console.WriteLine("RailSDK removal not needed on TML1.4");
+#warning RailSDK removal not needed on TML1.4
 #else
 using ModFramework;
 using Mono.Cecil;
@@ -27,32 +27,36 @@ using MonoMod;
 using System.IO;
 using System.Linq;
 
-/// <summary>
-/// @doc Patches RailSDK to load on netcore
-/// </summary>
-[Modification(ModType.PreMerge, "Patching RailSDK")]
 [MonoMod.MonoModIgnore]
-void PatchRailSDK(MonoModder modder)
+static class B384680188CA4A9083017801C2A34C95
 {
-	var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("RailSDK.NET.dll", System.StringComparison.CurrentCultureIgnoreCase));
-	var er = sw as EmbeddedResource;
-	AssemblyDefinition asm;
-	byte[] newbin;
-	using (var bin = er.GetResourceStream())
+	/// <summary>
+	/// @doc Patches RailSDK to load on netcore
+	/// </summary>
+	[Modification(ModType.PreMerge, "Patching RailSDK")]
+	[MonoMod.MonoModIgnore]
+	static void PatchRailSDK(MonoModder modder)
 	{
-		asm = AssemblyDefinition.ReadAssembly(bin);
-
-		asm.MainModule.SetAnyCPU();
-
-		using (var ms = new MemoryStream())
+		var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("RailSDK.NET.dll", System.StringComparison.CurrentCultureIgnoreCase));
+		var er = sw as EmbeddedResource;
+		AssemblyDefinition asm;
+		byte[] newbin;
+		using (var bin = er.GetResourceStream())
 		{
-			asm.Write(ms);
-			newbin = ms.ToArray();
-		}
-	}
+			asm = AssemblyDefinition.ReadAssembly(bin);
 
-	var newres = new EmbeddedResource(er.Name, er.Attributes, newbin);
-	modder.Module.Resources.Remove(sw);
-	modder.Module.Resources.Add(newres);
+			asm.MainModule.SetAnyCPU();
+
+			using (var ms = new MemoryStream())
+			{
+				asm.Write(ms);
+				newbin = ms.ToArray();
+			}
+		}
+
+		var newres = new EmbeddedResource(er.Name, er.Attributes, newbin);
+		modder.Module.Resources.Remove(sw);
+		modder.Module.Resources.Add(newres);
+	}
 }
 #endif
