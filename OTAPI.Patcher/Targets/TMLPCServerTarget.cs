@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 using ModFramework;
 using OTAPI.Patcher.Resolvers;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -57,6 +58,9 @@ public class TMLPCServerTarget : PCServerTarget
 
     public override void LoadModifications()
     {
+        // deletes Terraria.ModLoader.MonoModHooks and breaks tML
+        Environment.SetEnvironmentVariable("MONOMOD_CLEANUP_ALL", "0");
+
         base.LoadModifications();
 
         ModContext.ReferenceFiles.Add(Path.Combine("tModLoader", "Libraries", "FNA", "1.0.0", "FNA.dll"));
