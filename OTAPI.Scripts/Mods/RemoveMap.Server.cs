@@ -24,17 +24,21 @@ System.Console.WriteLine("RemoveMap not available in TML1.3. Might be future sup
 using ModFramework;
 using MonoMod;
 
-/// <summary>
-/// @doc Disables the world map to be created on the server (it is not needed, at least on vanilla).
-/// </summary>
-[Modification(ModType.PreMerge, "Removing world map")]
 [MonoMod.MonoModIgnore]
-void RemoveMap(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-	var worldMap = modder.GetDefinition<Terraria.Map.WorldMap>();
-	foreach (var method in worldMap.Methods)
+	/// <summary>
+	/// @doc Disables the world map to be created on the server (it is not needed, at least on vanilla).
+	/// </summary>
+	[Modification(ModType.PreMerge, "Removing world map")]
+	[MonoMod.MonoModIgnore]
+	void RemoveMap(MonoModder modder)
 	{
-		method.ClearBody();
+		var worldMap = modder.GetDefinition<Terraria.Map.WorldMap>();
+		foreach (var method in worldMap.Methods)
+		{
+			method.ClearBody();
+		}
 	}
 }
 #endif

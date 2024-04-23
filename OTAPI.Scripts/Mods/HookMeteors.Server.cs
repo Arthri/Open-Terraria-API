@@ -28,43 +28,47 @@ using ModFramework;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-/// <summary>
-/// @doc Creates Hooks.WorldGen.Meteor. Allows plugins to cancel meteors.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking meteors")]
 [MonoMod.MonoModIgnore]
-void HookMeteors(ModFramework.ModFwModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var csr = modder.GetILCursor(() => Terraria.WorldGen.meteor(0, 0, false));
+    /// <summary>
+    /// @doc Creates Hooks.WorldGen.Meteor. Allows plugins to cancel meteors.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking meteors")]
+    [MonoMod.MonoModIgnore]
+    void HookMeteors(ModFramework.ModFwModder modder)
+    {
+        var csr = modder.GetILCursor(() => Terraria.WorldGen.meteor(0, 0, false));
 
-    // look for stopDrops = true in the vanilla methods instructions to find the
-    // continuation instruction that follows it.
-    csr.GotoNext(MonoMod.Cil.MoveType.Before, instruction =>
-        instruction.OpCode == OpCodes.Ldc_I4_1
+        // look for stopDrops = true in the vanilla methods instructions to find the
+        // continuation instruction that follows it.
+        csr.GotoNext(MonoMod.Cil.MoveType.Before, instruction =>
+            instruction.OpCode == OpCodes.Ldc_I4_1
 
-        && instruction.Next.OpCode == OpCodes.Stsfld
-        && instruction.Next.Operand is FieldReference
-        && (instruction.Next.Operand as FieldReference).Name == "stopDrops"
-    );
+            && instruction.Next.OpCode == OpCodes.Stsfld
+            && instruction.Next.Operand is FieldReference
+            && (instruction.Next.Operand as FieldReference).Name == "stopDrops"
+        );
 
-    var insContinue = csr.Next;
+        var insContinue = csr.Next;
 
-    csr.EmitAll(
-        //Create the callback execution
-        new { OpCodes.Ldarga, Operand = csr.Method.Parameters[0] }, //reference to int x
-        new { OpCodes.Ldarga, Operand = csr.Method.Parameters[1] } //reference to int y
-    );
+        csr.EmitAll(
+            //Create the callback execution
+            new { OpCodes.Ldarga, Operand = csr.Method.Parameters[0] }, //reference to int x
+            new { OpCodes.Ldarga, Operand = csr.Method.Parameters[1] } //reference to int y
+        );
 
-    csr.EmitDelegate(OTAPI.Hooks.WorldGen.InvokeMeteor);
+        csr.EmitDelegate(OTAPI.Hooks.WorldGen.InvokeMeteor);
 
-    csr.EmitAll(
-        //If the callback is not canceled, continue on with vanilla code
-        new { OpCodes.Brtrue_S, insContinue },
+        csr.EmitAll(
+            //If the callback is not canceled, continue on with vanilla code
+            new { OpCodes.Brtrue_S, insContinue },
 
-        //If the callback is canceled, return false
-        new { OpCodes.Ldc_I4_0 }, //false
-        new { OpCodes.Ret } //return
-    );
+            //If the callback is canceled, return false
+            new { OpCodes.Ldc_I4_0 }, //false
+            new { OpCodes.Ret } //return
+        );
+    }
 }
 
 namespace OTAPI

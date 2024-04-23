@@ -27,36 +27,40 @@ using MonoMod.Cil;
 using System;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Hooks.NetMessage.SendBytes. Allows plugins to intercept the sending of data.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.NetMessage.SendData")]
 [MonoMod.MonoModIgnore]
-void HookClientSendBytes(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Creates Hooks.NetMessage.SendBytes. Allows plugins to intercept the sending of data.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.NetMessage.SendData")]
+    [MonoMod.MonoModIgnore]
+    void HookClientSendBytes(MonoModder modder)
+    {
 #if TerrariaServer_SendDataNumber8
-    var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
+        var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
 #else
-    var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
+        var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
 #endif
 
-    while (SendData.TryGotoNext(
-        i => i.OpCode == OpCodes.Callvirt
-            && i.Operand is MethodReference methodReference
-            && methodReference.Name == "AsyncSend"
-    ))
-    {
-        SendData.FindNext(out ILCursor[] cursors, i => i.OpCode == OpCodes.Pop && (i.Previous?.OpCode == OpCodes.Leave || i.Previous?.OpCode == OpCodes.Leave_S));
-
-        if (cursors.Length != 1) throw new System.Exception($"Expected to be within a try/catch block");
-
-        var handler = SendData.Method.Body.ExceptionHandlers.Single(x => x.TryEnd == cursors[0].Next);
-
-        if (handler.TryStart.Next.OpCode == OpCodes.Ldloc_S || handler.TryStart.Next.OpCode == OpCodes.Ldarg_1)
+        while (SendData.TryGotoNext(
+            i => i.OpCode == OpCodes.Callvirt
+                && i.Operand is MethodReference methodReference
+                && methodReference.Name == "AsyncSend"
+        ))
         {
-            SendData.Emit(handler.TryStart.Next.OpCode, handler.TryStart.Next.Operand);
-            SendData.EmitDelegate(OTAPI.Hooks.NetMessage.InvokeSendBytes);
-            SendData.Remove();
+            SendData.FindNext(out ILCursor[] cursors, i => i.OpCode == OpCodes.Pop && (i.Previous?.OpCode == OpCodes.Leave || i.Previous?.OpCode == OpCodes.Leave_S));
+
+            if (cursors.Length != 1) throw new System.Exception($"Expected to be within a try/catch block");
+
+            var handler = SendData.Method.Body.ExceptionHandlers.Single(x => x.TryEnd == cursors[0].Next);
+
+            if (handler.TryStart.Next.OpCode == OpCodes.Ldloc_S || handler.TryStart.Next.OpCode == OpCodes.Ldarg_1)
+            {
+                SendData.Emit(handler.TryStart.Next.OpCode, handler.TryStart.Next.Operand);
+                SendData.EmitDelegate(OTAPI.Hooks.NetMessage.InvokeSendBytes);
+                SendData.Remove();
+            }
         }
     }
 }

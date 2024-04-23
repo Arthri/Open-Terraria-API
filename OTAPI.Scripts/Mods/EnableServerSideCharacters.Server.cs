@@ -24,29 +24,33 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using MonoMod.Cil;
 
-/// <summary>
-/// @doc Attaches newtwork packets to the Terraria.Main.ServerSideCharacter variable. This allows sub projects like TShock to activate SSC. 
-/// </summary>
-[Modification(ModType.PreMerge, "Enabling server side characters")]
 [MonoMod.MonoModIgnore]
-void EnableServerSideCharacters(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    // find the occurance of downedClown and insert the SSC field to the missing BitsByte instance
+    /// <summary>
+    /// @doc Attaches newtwork packets to the Terraria.Main.ServerSideCharacter variable. This allows sub projects like TShock to activate SSC. 
+    /// </summary>
+    [Modification(ModType.PreMerge, "Enabling server side characters")]
+    [MonoMod.MonoModIgnore]
+    void EnableServerSideCharacters(MonoModder modder)
+    {
+        // find the occurance of downedClown and insert the SSC field to the missing BitsByte instance
 #if TerrariaServer_SendDataNumber8
-    var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
+        var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
 #else
-    var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
+        var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
 #endif
-    var sscField = modder.GetFieldDefinition(() => Terraria.Main.ServerSideCharacter);
+        var sscField = modder.GetFieldDefinition(() => Terraria.Main.ServerSideCharacter);
 
-    sendData.GotoNext(MoveType.After, (ins) => ins.MatchLdsfld("Terraria.NPC", "downedClown"));
-    sendData.GotoNext(MoveType.After, (ins) => ins.OpCode == OpCodes.Call);
+        sendData.GotoNext(MoveType.After, (ins) => ins.MatchLdsfld("Terraria.NPC", "downedClown"));
+        sendData.GotoNext(MoveType.After, (ins) => ins.OpCode == OpCodes.Call);
 
-    var bitsByteInstance = sendData.Next.Operand as VariableDefinition;  // Terraria.BitsByte instance
-    var setItem = sendData.Previous.Operand as MethodReference;  // Terraria.BitsByte::set_Item
+        var bitsByteInstance = sendData.Next.Operand as VariableDefinition;  // Terraria.BitsByte instance
+        var setItem = sendData.Previous.Operand as MethodReference;  // Terraria.BitsByte::set_Item
 
-    sendData.Emit(OpCodes.Ldloca_S, bitsByteInstance);
-    sendData.Emit(OpCodes.Ldc_I4_6);
-    sendData.Emit(OpCodes.Ldsfld, sscField);
-    sendData.Emit(OpCodes.Call, setItem);
+        sendData.Emit(OpCodes.Ldloca_S, bitsByteInstance);
+        sendData.Emit(OpCodes.Ldc_I4_6);
+        sendData.Emit(OpCodes.Ldsfld, sscField);
+        sendData.Emit(OpCodes.Call, setItem);
+    }
 }

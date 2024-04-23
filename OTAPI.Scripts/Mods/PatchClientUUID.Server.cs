@@ -25,54 +25,58 @@ using MonoMod;
 using System;
 using System.Collections.Generic;
 
-/// <summary>
-/// @doc Patch in a custom Terraria.RemoteClient.ClientUUID property, and hooks it up into the network protocol.
-/// </summary>
-[Modification(ModType.PostPatch, "Patching in Client UUID")]
 [MonoMod.MonoModIgnore]
-void PatchClientUUID(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    const int PacketID = 68;
-    int messageType = 0;
-    var GetData = modder.GetILCursor(() => new Terraria.MessageBuffer().GetData(0, 0, out messageType));
-    var Callback = modder.GetMethodDefinition(() => OTAPI.Hooks.MessageBuffer.InvokeClientUUIDReceived(default, default, default, default, ref messageType));
-
-    GetData.GotoNext(i => i.OpCode == OpCodes.Switch);
-
-    var instructions = (Instruction[])GetData.Next.Operand;
-
-    var packet = instructions[PacketID - 1];
-
-    GetData.Goto(packet);
-
-    /*
-     *  Replace the ReadString call with the callback. Reference il:
-
-        // reader.ReadString();
-        IL_655e: ldarg.0        == GetData.Next
-        IL_655f: ldfld class [mscorlib]System.IO.BinaryReader Terraria.MessageBuffer::reader
-        IL_6564: callvirt instance string [mscorlib]System.IO.BinaryReader::ReadString()
-        IL_6569: pop
-        IL_656a: ret
-    */
-
-    GetData.Index++;
-    GetData.Emit(OpCodes.Ldarg_0);
-
-    GetData.Index++;
-
-    foreach (var parameter in GetData.Method.Parameters)
+    /// <summary>
+    /// @doc Patch in a custom Terraria.RemoteClient.ClientUUID property, and hooks it up into the network protocol.
+    /// </summary>
+    [Modification(ModType.PostPatch, "Patching in Client UUID")]
+    [MonoMod.MonoModIgnore]
+    void PatchClientUUID(MonoModder modder)
     {
-        GetData.Emit(OpCodes.Ldarg, parameter);
+        const int PacketID = 68;
+        int messageType = 0;
+        var GetData = modder.GetILCursor(() => new Terraria.MessageBuffer().GetData(0, 0, out messageType));
+        var Callback = modder.GetMethodDefinition(() => OTAPI.Hooks.MessageBuffer.InvokeClientUUIDReceived(default, default, default, default, ref messageType));
+
+        GetData.GotoNext(i => i.OpCode == OpCodes.Switch);
+
+        var instructions = (Instruction[])GetData.Next.Operand;
+
+        var packet = instructions[PacketID - 1];
+
+        GetData.Goto(packet);
+
+        /*
+        *  Replace the ReadString call with the callback. Reference il:
+
+            // reader.ReadString();
+            IL_655e: ldarg.0        == GetData.Next
+            IL_655f: ldfld class [mscorlib]System.IO.BinaryReader Terraria.MessageBuffer::reader
+            IL_6564: callvirt instance string [mscorlib]System.IO.BinaryReader::ReadString()
+            IL_6569: pop
+            IL_656a: ret
+        */
+
+        GetData.Index++;
+        GetData.Emit(OpCodes.Ldarg_0);
+
+        GetData.Index++;
+
+        foreach (var parameter in GetData.Method.Parameters)
+        {
+            GetData.Emit(OpCodes.Ldarg, parameter);
+        }
+
+        System.Diagnostics.Debug.Assert(GetData.Next.OpCode == OpCodes.Callvirt);
+        GetData.Next.OpCode = OpCodes.Call;
+        GetData.Next.Operand = Callback;
+
+        GetData.Index++;
+        System.Diagnostics.Debug.Assert(GetData.Next.OpCode == OpCodes.Pop);
+        GetData.Next.OpCode = OpCodes.Nop;
     }
-
-    System.Diagnostics.Debug.Assert(GetData.Next.OpCode == OpCodes.Callvirt);
-    GetData.Next.OpCode = OpCodes.Call;
-    GetData.Next.Operand = Callback;
-
-    GetData.Index++;
-    System.Diagnostics.Debug.Assert(GetData.Next.OpCode == OpCodes.Pop);
-    GetData.Next.OpCode = OpCodes.Nop;
 }
 
 namespace OTAPI

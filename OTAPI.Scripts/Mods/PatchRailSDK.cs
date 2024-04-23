@@ -27,32 +27,36 @@ using MonoMod;
 using System.IO;
 using System.Linq;
 
-/// <summary>
-/// @doc Patches RailSDK to load on netcore
-/// </summary>
-[Modification(ModType.PreMerge, "Patching RailSDK")]
 [MonoMod.MonoModIgnore]
-void PatchRailSDK(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-	var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("RailSDK.NET.dll", System.StringComparison.CurrentCultureIgnoreCase));
-	var er = sw as EmbeddedResource;
-	AssemblyDefinition asm;
-	byte[] newbin;
-	using (var bin = er.GetResourceStream())
+	/// <summary>
+	/// @doc Patches RailSDK to load on netcore
+	/// </summary>
+	[Modification(ModType.PreMerge, "Patching RailSDK")]
+	[MonoMod.MonoModIgnore]
+	void PatchRailSDK(MonoModder modder)
 	{
-		asm = AssemblyDefinition.ReadAssembly(bin);
-
-		asm.MainModule.SetAnyCPU();
-
-		using (var ms = new MemoryStream())
+		var sw = modder.Module.Resources.Single(r => r.Name.EndsWith("RailSDK.NET.dll", System.StringComparison.CurrentCultureIgnoreCase));
+		var er = sw as EmbeddedResource;
+		AssemblyDefinition asm;
+		byte[] newbin;
+		using (var bin = er.GetResourceStream())
 		{
-			asm.Write(ms);
-			newbin = ms.ToArray();
-		}
-	}
+			asm = AssemblyDefinition.ReadAssembly(bin);
 
-	var newres = new EmbeddedResource(er.Name, er.Attributes, newbin);
-	modder.Module.Resources.Remove(sw);
-	modder.Module.Resources.Add(newres);
+			asm.MainModule.SetAnyCPU();
+
+			using (var ms = new MemoryStream())
+			{
+				asm.Write(ms);
+				newbin = ms.ToArray();
+			}
+		}
+
+		var newres = new EmbeddedResource(er.Name, er.Attributes, newbin);
+		modder.Module.Resources.Remove(sw);
+		modder.Module.Resources.Add(newres);
+	}
 }
 #endif

@@ -24,26 +24,30 @@ using MonoMod.Cil;
 using Terraria;
 using Terraria.Initializers;
 
-/// <summary>
-/// @doc Removes the netMode check on AchievementInitializer, so that it can be ran on servers
-/// </summary>
-/// <remarks>
-/// https://github.com/Pryaxis/TShock/commit/794bff5ef772b0c951c29349922360e9d41c11d7
-/// </remarks>
-[Modification(ModType.PreMerge, "Allowing AchievementInitializer to run on servers")]
 [MonoMod.MonoModIgnore]
-void PatchAchievementInitializer(ModFwModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var m_Load = modder.GetMethodDefinition(() => AchievementInitializer.Load());
-
-    var cursor = new ILCursor(new ILContext(m_Load));
-    Instruction endIf = null!;
-    while (cursor.TryGotoNext(
-        i => i.MatchCall<Main>($"get_{nameof(Main.netMode)}") || i.MatchLdsfld<Main>(nameof(Main.netMode)),
-        i => i.MatchLdcI4(2),
-        i => i.OpCode == OpCodes.Bne_Un || i.OpCode == OpCodes.Bne_Un_S && ((endIf = (i.Operand as Instruction)!) != null)
-    ))
+    /// <summary>
+    /// @doc Removes the netMode check on AchievementInitializer, so that it can be ran on servers
+    /// </summary>
+    /// <remarks>
+    /// https://github.com/Pryaxis/TShock/commit/794bff5ef772b0c951c29349922360e9d41c11d7
+    /// </remarks>
+    [Modification(ModType.PreMerge, "Allowing AchievementInitializer to run on servers")]
+    [MonoMod.MonoModIgnore]
+    void PatchAchievementInitializer(ModFwModder modder)
     {
-        cursor.RemoveWhile(i => i.Offset < endIf.Offset, false);
+        var m_Load = modder.GetMethodDefinition(() => AchievementInitializer.Load());
+
+        var cursor = new ILCursor(new ILContext(m_Load));
+        Instruction endIf = null!;
+        while (cursor.TryGotoNext(
+            i => i.MatchCall<Main>($"get_{nameof(Main.netMode)}") || i.MatchLdsfld<Main>(nameof(Main.netMode)),
+            i => i.MatchLdcI4(2),
+            i => i.OpCode == OpCodes.Bne_Un || i.OpCode == OpCodes.Bne_Un_S && ((endIf = (i.Operand as Instruction)!) != null)
+        ))
+        {
+            cursor.RemoveWhile(i => i.Offset < endIf.Offset, false);
+        }
     }
 }

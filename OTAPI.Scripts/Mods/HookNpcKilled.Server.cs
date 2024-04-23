@@ -25,23 +25,27 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.Killed. Allows plugins to cancel NPC killed events.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.NPC.checkDead")]
 [MonoMod.MonoModIgnore]
-void HookNpcKilled(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var checkDead = modder.GetILCursor(() => (new Terraria.NPC()).checkDead());
+    /// <summary>
+    /// @doc Creates Hooks.NPC.Killed. Allows plugins to cancel NPC killed events.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.NPC.checkDead")]
+    [MonoMod.MonoModIgnore]
+    void HookNpcKilled(MonoModder modder)
+    {
+        var checkDead = modder.GetILCursor(() => (new Terraria.NPC()).checkDead());
 
-    checkDead.GotoNext(
-        // active = false;
-        i => i.OpCode == OpCodes.Ldc_I4_0
-        , i => i.OpCode == OpCodes.Stfld && i.Operand is FieldReference fieldReference && fieldReference.Name == "active" && fieldReference.DeclaringType.FullName == "Terraria.Entity"
-    );
+        checkDead.GotoNext(
+            // active = false;
+            i => i.OpCode == OpCodes.Ldc_I4_0
+            , i => i.OpCode == OpCodes.Stfld && i.Operand is FieldReference fieldReference && fieldReference.Name == "active" && fieldReference.DeclaringType.FullName == "Terraria.Entity"
+        );
 
-    checkDead.EmitDelegate(OTAPI.Hooks.NPC.InvokeKilled);
-    checkDead.Emit(OpCodes.Ldarg_0);
+        checkDead.EmitDelegate(OTAPI.Hooks.NPC.InvokeKilled);
+        checkDead.Emit(OpCodes.Ldarg_0);
+    }
 }
 
 namespace OTAPI

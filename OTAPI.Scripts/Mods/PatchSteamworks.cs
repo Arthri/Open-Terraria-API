@@ -27,28 +27,32 @@ using MonoMod;
 using System.IO;
 using System.Linq;
 
-/// <summary>
-/// @doc Patches to the current steamworks.net binary
-/// </summary>
-[Modification(ModType.PreMerge, "Patching Steamworks.NET")]
 [MonoMod.MonoModIgnore]
-void PatchSteam(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var desired = typeof(Steamworks.SteamShutdown_t).Assembly.GetName().Version;
-
-    //Update the references to match what is installed
-    foreach (var reference in modder.Module.AssemblyReferences)
+    /// <summary>
+    /// @doc Patches to the current steamworks.net binary
+    /// </summary>
+    [Modification(ModType.PreMerge, "Patching Steamworks.NET")]
+    [MonoMod.MonoModIgnore]
+    void PatchSteam(MonoModder modder)
     {
-        if (reference.Name == "Steamworks.NET")
-        {
-            reference.Version = desired;
-            break;
-        }
-    }
+        var desired = typeof(Steamworks.SteamShutdown_t).Assembly.GetName().Version;
 
-    //Remove the embedded Newtonsoft resource
-    modder.Module.Resources.Remove(
-        modder.Module.Resources.Single(x => x.Name.EndsWith("Steamworks.NET.dll"))
-    );
+        //Update the references to match what is installed
+        foreach (var reference in modder.Module.AssemblyReferences)
+        {
+            if (reference.Name == "Steamworks.NET")
+            {
+                reference.Version = desired;
+                break;
+            }
+        }
+
+        //Remove the embedded Newtonsoft resource
+        modder.Module.Resources.Remove(
+            modder.Module.Resources.Single(x => x.Name.EndsWith("Steamworks.NET.dll"))
+        );
+    }
 }
 #endif

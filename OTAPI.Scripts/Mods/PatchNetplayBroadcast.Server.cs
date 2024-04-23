@@ -28,30 +28,34 @@ using System.Runtime.ConstrainedExecution;
 #if tModLoaderServer_V1_3 || tModLoader_V1_4
 System.Console.WriteLine("BroadcastThread not available in TML");
 #else
-/// <summary>
-/// @doc Fix Terraria.Netplay.BroadcastThread infinite loop.
-/// </summary>
-[Modification(ModType.PostPatch, "Patching Netplay Broadcast")]
 [MonoMod.MonoModIgnore]
-void PatchNetplayBroadcast(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    const string Name_BroadcastThreadActive = nameof(Terraria.patch_Netplay.BroadcastThreadActive);
-    var BroadcastThread = modder.GetILCursor(() => Terraria.Netplay.BroadcastThread());
-    var BroadcastThreadActive = BroadcastThread.Method.DeclaringType.Fields.Single(m => m.Name == Name_BroadcastThreadActive);
+    /// <summary>
+    /// @doc Fix Terraria.Netplay.BroadcastThread infinite loop.
+    /// </summary>
+    [Modification(ModType.PostPatch, "Patching Netplay Broadcast")]
+    [MonoMod.MonoModIgnore]
+    void PatchNetplayBroadcast(MonoModder modder)
+    {
+        const string Name_BroadcastThreadActive = nameof(Terraria.patch_Netplay.BroadcastThreadActive);
+        var BroadcastThread = modder.GetILCursor(() => Terraria.Netplay.BroadcastThread());
+        var BroadcastThreadActive = BroadcastThread.Method.DeclaringType.Fields.Single(m => m.Name == Name_BroadcastThreadActive);
 
-    BroadcastThread.GotoNext(
-        i => i.OpCode == OpCodes.Call
-            && i.Operand is MethodReference methodReference
-            && methodReference.Name == "Sleep"
-            && i.Next.OpCode == OpCodes.Br_S
-    );
+        BroadcastThread.GotoNext(
+            i => i.OpCode == OpCodes.Call
+                && i.Operand is MethodReference methodReference
+                && methodReference.Name == "Sleep"
+                && i.Next.OpCode == OpCodes.Br_S
+        );
 
-    BroadcastThread.Index++;
+        BroadcastThread.Index++;
 
-    BroadcastThread.Emit(OpCodes.Ldsfld, BroadcastThreadActive);
-    BroadcastThread.Next.OpCode = OpCodes.Brtrue;
-    BroadcastThread.Index++;
-    BroadcastThread.Emit(OpCodes.Ret);
+        BroadcastThread.Emit(OpCodes.Ldsfld, BroadcastThreadActive);
+        BroadcastThread.Next.OpCode = OpCodes.Brtrue;
+        BroadcastThread.Index++;
+        BroadcastThread.Emit(OpCodes.Ret);
+    }
 }
 
 namespace Terraria

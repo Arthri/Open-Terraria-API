@@ -29,31 +29,35 @@ using MonoMod;
 using System;
 using Terraria.Net.Sockets;
 
-/// <summary>
-/// @doc Creates Hooks.Netplay.CreateTcpListener. Allows custom TCP implementations to be used.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking tcp interfaces")]
 [MonoMod.MonoModIgnore]
-void HookClientSockets(ModFwModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.Netplay.InvokeCreateTcpListener());
-    var tcpSocket = modder.GetDefinition<TcpSocket>();
-    modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
+    /// <summary>
+    /// @doc Creates Hooks.Netplay.CreateTcpListener. Allows custom TCP implementations to be used.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking tcp interfaces")]
+    [MonoMod.MonoModIgnore]
+    void HookClientSockets(ModFwModder modder)
     {
-        if (instr.OpCode == OpCodes.Newobj
-            && instr.Operand is MethodReference mref
-            && mref.DeclaringType.FullName == tcpSocket.FullName
-            && body.Method.DeclaringType.FullName != tcpSocket.FullName
-            && body.Method.Name != nameof(OTAPI.Hooks.Netplay.InvokeCreateTcpListener)
-        )
+        var callback = modder.GetMethodDefinition(() => OTAPI.Hooks.Netplay.InvokeCreateTcpListener());
+        var tcpSocket = modder.GetDefinition<TcpSocket>();
+        modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
         {
-            if (mref.Parameters.Count != 0)
-                throw new Exception($"Expected no parameters for {tcpSocket.FullName} in {body.Method.FullName}");
+            if (instr.OpCode == OpCodes.Newobj
+                && instr.Operand is MethodReference mref
+                && mref.DeclaringType.FullName == tcpSocket.FullName
+                && body.Method.DeclaringType.FullName != tcpSocket.FullName
+                && body.Method.Name != nameof(OTAPI.Hooks.Netplay.InvokeCreateTcpListener)
+            )
+            {
+                if (mref.Parameters.Count != 0)
+                    throw new Exception($"Expected no parameters for {tcpSocket.FullName} in {body.Method.FullName}");
 
-            instr.OpCode = OpCodes.Call;
-            instr.Operand = callback;
-        }
-    };
+                instr.OpCode = OpCodes.Call;
+                instr.Operand = callback;
+            }
+        };
+    }
 }
 
 namespace OTAPI

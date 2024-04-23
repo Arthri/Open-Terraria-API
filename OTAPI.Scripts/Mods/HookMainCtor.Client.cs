@@ -24,31 +24,35 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Hooks.Main.Create. Allows plugins to extend and return a custom Terraria.Main instance.
-/// </summary>
-[Modification(ModType.PostPatch, "Hooking new Main calls", ModPriority.Last)]
 [MonoMod.MonoModIgnore]
-void HookMainCtor(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-#if Terraria_1442_OrAbove
-    var LaunchGame = modder.GetILCursor(() => Terraria.Program.RunGame());
-#else
-    var LaunchGame = modder.GetILCursor(() => Terraria.Program.LaunchGame(null, false));
-#endif
+    /// <summary>
+    /// @doc Creates Hooks.Main.Create. Allows plugins to extend and return a custom Terraria.Main instance.
+    /// </summary>
+    [Modification(ModType.PostPatch, "Hooking new Main calls", ModPriority.Last)]
+    [MonoMod.MonoModIgnore]
+    void HookMainCtor(MonoModder modder)
+    {
+Terraria_1442_OrAbove
+        var LaunchGame = modder.GetILCursor(() => Terraria.Program.RunGame());
+e
+        var LaunchGame = modder.GetILCursor(() => Terraria.Program.LaunchGame(null, false));
+if
 
-    var createGame = modder.GetMethodDefinition(() => OTAPI.Hooks.Main.InvokeCreate());
+        var createGame = modder.GetMethodDefinition(() => OTAPI.Hooks.Main.InvokeCreate());
 
-    LaunchGame.GotoNext(MonoMod.Cil.MoveType.Before,
-        // active = false;
-        i => i.OpCode == OpCodes.Newobj
-            && i.Operand is MethodReference mref
-            && mref.DeclaringType.Name == "Main"
-            && mref.Name == ".ctor"
-    );
+        LaunchGame.GotoNext(MonoMod.Cil.MoveType.Before,
+            // active = false;
+            i => i.OpCode == OpCodes.Newobj
+                && i.Operand is MethodReference mref
+                && mref.DeclaringType.Name == "Main"
+                && mref.Name == ".ctor"
+        );
 
-    LaunchGame.Next.OpCode = OpCodes.Call;
-    LaunchGame.Next.Operand = createGame;
+        LaunchGame.Next.OpCode = OpCodes.Call;
+        LaunchGame.Next.Operand = createGame;
+    }
 }
 
 namespace OTAPI

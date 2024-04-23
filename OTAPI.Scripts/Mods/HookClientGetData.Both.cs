@@ -28,49 +28,53 @@ using MonoMod;
 using OTAPI;
 using System;
 
-/// <summary>
-/// @doc A mod to create Hooks.MessageBuffer.GetData. Allows plugins to process received packet data.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Terraria.MessageBuffer.GetData")]
 [MonoMod.MonoModIgnore]
-void HookClientGetData(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    int temp = 0;
-    var GetData = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out temp));
+    /// <summary>
+    /// @doc A mod to create Hooks.MessageBuffer.GetData. Allows plugins to process received packet data.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Terraria.MessageBuffer.GetData")]
+    [MonoMod.MonoModIgnore]
+    void HookClientGetData(MonoModder modder)
+    {
+        int temp = 0;
+        var GetData = modder.GetILCursor(() => (new Terraria.MessageBuffer()).GetData(0, 0, out temp));
 
-    GetData.GotoNext(
-        //if (b >= 140) { return; }
-        i => i.OpCode == OpCodes.Ldloc_0
+        GetData.GotoNext(
+            //if (b >= 140) { return; }
+            i => i.OpCode == OpCodes.Ldloc_0
 #if TerrariaServer_1448_OrAbove || Terraria_1448_OrAbove
-        , i => i.OpCode == OpCodes.Ldsfld
+            , i => i.OpCode == OpCodes.Ldsfld
 #else
-        , i => i.OpCode == OpCodes.Ldc_I4
+            , i => i.OpCode == OpCodes.Ldc_I4
 #endif
-        , i => i.OpCode == OpCodes.Blt_S
-        , i => i.OpCode == OpCodes.Ret
-    );
+            , i => i.OpCode == OpCodes.Blt_S
+            , i => i.OpCode == OpCodes.Ret
+        );
 #if !TerrariaServer_1448_OrAbove && !Terraria_1448_OrAbove
-    var maxPackets = (int)GetData.Instrs[GetData.Index + 1].Operand;
+        var maxPackets = (int)GetData.Instrs[GetData.Index + 1].Operand;
 #endif
 
-    GetData.RemoveRange(4);
+        GetData.RemoveRange(4);
 
-    GetData.Emit(OpCodes.Ldarg_0);
-    GetData.Emit(OpCodes.Ldloca, GetData.Body.Variables[0]); // packetID
-    GetData.Emit(OpCodes.Ldloca, GetData.Body.Variables[1]); // readOffset
+        GetData.Emit(OpCodes.Ldarg_0);
+        GetData.Emit(OpCodes.Ldloca, GetData.Body.Variables[0]); // packetID
+        GetData.Emit(OpCodes.Ldloca, GetData.Body.Variables[1]); // readOffset
 
-    foreach (var prm in GetData.Method.Parameters)
-        GetData.Emit(prm.IsOut ? OpCodes.Ldarg : OpCodes.Ldarga, prm);
+        foreach (var prm in GetData.Method.Parameters)
+            GetData.Emit(prm.IsOut ? OpCodes.Ldarg : OpCodes.Ldarga, prm);
 
 #if TerrariaServer_1448_OrAbove || Terraria_1448_OrAbove
-    var fld = modder.GetFieldDefinition(() => Terraria.ID.MessageID.Count);
-    GetData.Emit(OpCodes.Ldsfld, fld);
+        var fld = modder.GetFieldDefinition(() => Terraria.ID.MessageID.Count);
+        GetData.Emit(OpCodes.Ldsfld, fld);
 #else
-    GetData.Emit(OpCodes.Ldc_I4, maxPackets);
+        GetData.Emit(OpCodes.Ldc_I4, maxPackets);
 #endif
-    GetData.EmitDelegate(OTAPI.Hooks.MessageBuffer.InvokeGetData);
-    GetData.Emit(OpCodes.Brtrue, GetData.Instrs[GetData.Index]);
-    GetData.Emit(OpCodes.Ret);
+        GetData.EmitDelegate(OTAPI.Hooks.MessageBuffer.InvokeGetData);
+        GetData.Emit(OpCodes.Brtrue, GetData.Instrs[GetData.Index]);
+        GetData.Emit(OpCodes.Ret);
+    }
 }
 
 namespace OTAPI

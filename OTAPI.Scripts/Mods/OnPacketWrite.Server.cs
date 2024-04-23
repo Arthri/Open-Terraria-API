@@ -25,50 +25,54 @@ using MonoMod;
 using MonoMod.Utils;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Terraria.NetMessage.OnPacketWrite that mods can use t osend custom packets using the vanilla interface.
-/// </summary>
-[Modification(ModType.PreMerge, "Creating Terraria.NetMessage.OnPacketWrite", Dependencies = new[] {
-     "PatchSendDataWriter",
-     "PatchSendDataLocks",
-})]
 [MonoMod.MonoModIgnore]
-void OnPacketWrite(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    /*
-     * Find ISocket.IsConnected and look back for Main.netMode. Before that instruction a hook can be used to modify the packet.
-     */
+    /// <summary>
+    /// @doc Creates Terraria.NetMessage.OnPacketWrite that mods can use t osend custom packets using the vanilla interface.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Creating Terraria.NetMessage.OnPacketWrite", Dependencies = new[] {
+        "PatchSendDataWriter",
+        "PatchSendDataLocks",
+    })]
+    [MonoMod.MonoModIgnore]
+    void OnPacketWrite(MonoModder modder)
+    {
+        /*
+        * Find ISocket.IsConnected and look back for Main.netMode. Before that instruction a hook can be used to modify the packet.
+        */
 
 #if TerrariaServer_SendDataNumber8
-    var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
+        var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
 #else
-    var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
+        var sendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
 #endif
 
-    var bufferID = sendData.Body.Variables.First(v => v.VariableType.FullName == "System.Int32");
-    var ms = sendData.Body.Variables.Single(v => v.VariableType.FullName == "System.IO.MemoryStream");
-    var bw = sendData.Body.Variables.Single(v => v.VariableType.FullName == "System.IO.BinaryWriter" || v.VariableType.FullName == "OTAPI.PacketWriter");
+        var bufferID = sendData.Body.Variables.First(v => v.VariableType.FullName == "System.Int32");
+        var ms = sendData.Body.Variables.Single(v => v.VariableType.FullName == "System.IO.MemoryStream");
+        var bw = sendData.Body.Variables.Single(v => v.VariableType.FullName == "System.IO.BinaryWriter" || v.VariableType.FullName == "OTAPI.PacketWriter");
 
-    var callback = new MethodDefinition("OnPacketWrite", MethodAttributes.Public | MethodAttributes.Static, sendData.Module.TypeSystem.Void);
-    sendData.Method.DeclaringType.Methods.Add(callback);
-    callback.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        var callback = new MethodDefinition("OnPacketWrite", MethodAttributes.Public | MethodAttributes.Static, sendData.Module.TypeSystem.Void);
+        sendData.Method.DeclaringType.Methods.Add(callback);
+        callback.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-    callback.Parameters.Add(new ParameterDefinition("num", ParameterAttributes.None, sendData.Module.TypeSystem.Int32));
-    callback.Parameters.Add(new ParameterDefinition("ms", ParameterAttributes.None, ms.VariableType));
-    callback.Parameters.Add(new ParameterDefinition("bw", ParameterAttributes.None, bw.VariableType));
+        callback.Parameters.Add(new ParameterDefinition("num", ParameterAttributes.None, sendData.Module.TypeSystem.Int32));
+        callback.Parameters.Add(new ParameterDefinition("ms", ParameterAttributes.None, ms.VariableType));
+        callback.Parameters.Add(new ParameterDefinition("bw", ParameterAttributes.None, bw.VariableType));
 
-    sendData.GotoNext(ins => ins.Operand is MethodReference mr && mr.Name == "IsConnected" && mr.DeclaringType.Name == "ISocket");
-    sendData.GotoPrev(ins => ins.Operand is FieldReference fr && fr.Name == "netMode" && fr.DeclaringType.Name == "Main");
+        sendData.GotoNext(ins => ins.Operand is MethodReference mr && mr.Name == "IsConnected" && mr.DeclaringType.Name == "ISocket");
+        sendData.GotoPrev(ins => ins.Operand is FieldReference fr && fr.Name == "netMode" && fr.DeclaringType.Name == "Main");
 
-    sendData.Emit(OpCodes.Ldloc, bufferID);
-    sendData.Emit(OpCodes.Ldloc, ms);
-    sendData.Emit(OpCodes.Ldloc, bw);
+        sendData.Emit(OpCodes.Ldloc, bufferID);
+        sendData.Emit(OpCodes.Ldloc, ms);
+        sendData.Emit(OpCodes.Ldloc, bw);
 
-    foreach (var method in sendData.Method.Parameters)
-    {
-        callback.Parameters.Add(method.Clone());
-        sendData.Emit(OpCodes.Ldarg, method);
+        foreach (var method in sendData.Method.Parameters)
+        {
+            callback.Parameters.Add(method.Clone());
+            sendData.Emit(OpCodes.Ldarg, method);
+        }
+
+        sendData.Emit(OpCodes.Call, callback);
     }
-
-    sendData.Emit(OpCodes.Call, callback);
 }

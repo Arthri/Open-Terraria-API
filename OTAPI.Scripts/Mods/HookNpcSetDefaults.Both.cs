@@ -24,29 +24,33 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Creates Terraria.NPC.OnSetDefaultType. Allows plugins to hook when NPC instances need to set custom type values in SetDefaults.
-/// </summary>
-[Modification(ModType.PreMerge, "Adding Terraria.NPC.OnSetDefaultType()")]
 [MonoMod.MonoModIgnore]
-void CreateOnSetDefaultType(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Creates Terraria.NPC.OnSetDefaultType. Allows plugins to hook when NPC instances need to set custom type values in SetDefaults.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Adding Terraria.NPC.OnSetDefaultType()")]
+    [MonoMod.MonoModIgnore]
+    void CreateOnSetDefaultType(MonoModder modder)
+    {
 #if tModLoaderServer_V1_3
-    var SetDefaults = modder.GetILCursor(() => new Terraria.NPC().SetDefaults(0, 0f));
+        var SetDefaults = modder.GetILCursor(() => new Terraria.NPC().SetDefaults(0, 0f));
 #else
-    var SetDefaults = modder.GetILCursor(() => new Terraria.NPC().SetDefaults(0, default(Terraria.NPCSpawnParams)));
+        var SetDefaults = modder.GetILCursor(() => new Terraria.NPC().SetDefaults(0, default(Terraria.NPCSpawnParams)));
 #endif
 
-    SetDefaults.GotoNext(
-        i => i.Operand is FieldReference fieldReference && fieldReference.Name == "dedServ" && fieldReference.DeclaringType.FullName == "Terraria.Main"
-    );
+        SetDefaults.GotoNext(
+            i => i.Operand is FieldReference fieldReference && fieldReference.Name == "dedServ" && fieldReference.DeclaringType.FullName == "Terraria.Main"
+        );
 
-    var callback = new MethodDefinition("OnSetDefaultType", MethodAttributes.Public, SetDefaults.Module.TypeSystem.Void);
-    SetDefaults.Method.DeclaringType.Methods.Add(callback);
-    callback.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        var callback = new MethodDefinition("OnSetDefaultType", MethodAttributes.Public, SetDefaults.Module.TypeSystem.Void);
+        SetDefaults.Method.DeclaringType.Methods.Add(callback);
+        callback.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-    SetDefaults.Emit(OpCodes.Ldarg_0);
-    SetDefaults.Emit(OpCodes.Call, callback);
+        SetDefaults.Emit(OpCodes.Ldarg_0);
+        SetDefaults.Emit(OpCodes.Call, callback);
 
-    SetDefaults.Next.ReplaceTransfer(SetDefaults.Prev.Previous, SetDefaults.Method);
+        SetDefaults.Next.ReplaceTransfer(SetDefaults.Prev.Previous, SetDefaults.Method);
+    }
 }

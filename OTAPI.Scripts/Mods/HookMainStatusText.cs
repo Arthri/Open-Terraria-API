@@ -26,22 +26,26 @@ using ModFramework;
 using Mono.Cecil;
 using System;
 
-/// <summary>
-/// @doc A mod to create Hooks.Main.StatusTextUpdate. Allows plugins to receive writes to Main.statusText.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Main.statusText")]
 [MonoMod.MonoModIgnore]
-void HookMainStatusText(ModFwModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var field = modder.GetFieldDefinition(() => Terraria.Main.statusText);
-    var property = field.RemapAsProperty(modder);
+    /// <summary>
+    /// @doc A mod to create Hooks.Main.StatusTextUpdate. Allows plugins to receive writes to Main.statusText.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Main.statusText")]
+    [MonoMod.MonoModIgnore]
+    void HookMainStatusText(ModFwModder modder)
+    {
+        var field = modder.GetFieldDefinition(() => Terraria.Main.statusText);
+        var property = field.RemapAsProperty(modder);
 
-    // insert a method to allow plugins to intercept writes.
-    // tried using monomod hooks on the setmethod but doesnt always work.
-    var csr = modder.GetILCursor(property.SetMethod);
-    csr.GotoNext(MonoMod.Cil.MoveType.Before, i => i.Operand is FieldReference fr && fr.Name.Contains("__BackingField"));
+        // insert a method to allow plugins to intercept writes.
+        // tried using monomod hooks on the setmethod but doesnt always work.
+        var csr = modder.GetILCursor(property.SetMethod);
+        csr.GotoNext(MonoMod.Cil.MoveType.Before, i => i.Operand is FieldReference fr && fr.Name.Contains("__BackingField"));
 
-    csr.EmitDelegate(OTAPI.Hooks.Main.InvokeStatusTextChange);
+        csr.EmitDelegate(OTAPI.Hooks.Main.InvokeStatusTextChange);
+    }
 }
 
 namespace OTAPI

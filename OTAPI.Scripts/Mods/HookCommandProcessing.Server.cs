@@ -29,37 +29,41 @@ using MonoMod.Cil;
 using System;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Hooks.Main.CommandProcess. Allows plugins to intercept issued commands.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking command processing")]
 [MonoMod.MonoModIgnore]
-void HookCommandProcessing(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var startDedInputCallBack = modder.GetILCursor(() => Terraria.Main.startDedInputCallBack());
+    /// <summary>
+    /// @doc Creates Hooks.Main.CommandProcess. Allows plugins to intercept issued commands.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking command processing")]
+    [MonoMod.MonoModIgnore]
+    void HookCommandProcessing(MonoModder modder)
+    {
+        var startDedInputCallBack = modder.GetILCursor(() => Terraria.Main.startDedInputCallBack());
 
-    var vText = startDedInputCallBack.Body.Variables[0];
-    var vTextLowered = startDedInputCallBack.Body.Variables[1];
+        var vText = startDedInputCallBack.Body.Variables[0];
+        var vTextLowered = startDedInputCallBack.Body.Variables[1];
 
-    if (vText.VariableType.FullName != modder.Module.TypeSystem.String.FullName)
-        throw new NotSupportedException("Expected the first variable to be string");
-    if (vTextLowered.VariableType.FullName != modder.Module.TypeSystem.String.FullName)
-        throw new NotSupportedException("Expected the second variable to be string");
+        if (vText.VariableType.FullName != modder.Module.TypeSystem.String.FullName)
+            throw new NotSupportedException("Expected the first variable to be string");
+        if (vTextLowered.VariableType.FullName != modder.Module.TypeSystem.String.FullName)
+            throw new NotSupportedException("Expected the second variable to be string");
 
-    var exceptionHandler = startDedInputCallBack.Body.ExceptionHandlers.Single(
-        x => x.TryStart.Next.OpCode == OpCodes.Ldstr
-            && x.TryStart.Next.Operand.Equals("CLI.Help_Command")
-    );
+        var exceptionHandler = startDedInputCallBack.Body.ExceptionHandlers.Single(
+            x => x.TryStart.Next.OpCode == OpCodes.Ldstr
+                && x.TryStart.Next.Operand.Equals("CLI.Help_Command")
+        );
 
-    startDedInputCallBack.Goto(exceptionHandler.TryStart, MoveType.Before);
-    startDedInputCallBack.Emit(OpCodes.Ldloc, vText);
-    var newStart = startDedInputCallBack.Instrs[startDedInputCallBack.Index - 1];
+        startDedInputCallBack.Goto(exceptionHandler.TryStart, MoveType.Before);
+        startDedInputCallBack.Emit(OpCodes.Ldloc, vText);
+        var newStart = startDedInputCallBack.Instrs[startDedInputCallBack.Index - 1];
 
-    exceptionHandler.TryStart.ReplaceTransfer(newStart, startDedInputCallBack.Method);
+        exceptionHandler.TryStart.ReplaceTransfer(newStart, startDedInputCallBack.Method);
 
-    startDedInputCallBack.Emit(OpCodes.Ldloc, vTextLowered)
-        .EmitDelegate<Func<string, string, bool>>(OTAPI.Hooks.Main.InvokeCommandProcess);
-    startDedInputCallBack.Emit(OpCodes.Brfalse, exceptionHandler.TryEnd.Previous);
+        startDedInputCallBack.Emit(OpCodes.Ldloc, vTextLowered)
+            .EmitDelegate<Func<string, string, bool>>(OTAPI.Hooks.Main.InvokeCommandProcess);
+        startDedInputCallBack.Emit(OpCodes.Brfalse, exceptionHandler.TryEnd.Previous);
+    }
 }
 
 namespace OTAPI

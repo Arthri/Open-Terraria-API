@@ -25,28 +25,32 @@ using ModFramework;
 using MonoMod;
 using System.Linq;
 
-/// <summary>
-/// @doc A mod to update Newtonsoft.Json assembly references.
-/// </summary>
-[Modification(ModType.PostPatch, "Upgrading Newtonsoft.Json")]
 [MonoMod.MonoModIgnore]
-void PatchNewtonsoftJson(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var desired = typeof(Newtonsoft.Json.JsonConvert).Assembly.GetName().Version;
-
-    //Update the references to match what is installed
-    foreach (var reference in modder.Module.AssemblyReferences)
+    /// <summary>
+    /// @doc A mod to update Newtonsoft.Json assembly references.
+    /// </summary>
+    [Modification(ModType.PostPatch, "Upgrading Newtonsoft.Json")]
+    [MonoMod.MonoModIgnore]
+    void PatchNewtonsoftJson(MonoModder modder)
     {
-        if (reference.Name == "Newtonsoft.Json")
-        {
-            reference.Version = desired;
-            break;
-        }
-    }
+        var desired = typeof(Newtonsoft.Json.JsonConvert).Assembly.GetName().Version;
 
-    //Remove the embedded Newtonsoft resource
-    modder.Module.Resources.Remove(
-        modder.Module.Resources.Single(x => x.Name.EndsWith("Newtonsoft.Json.dll"))
-    );
+        //Update the references to match what is installed
+        foreach (var reference in modder.Module.AssemblyReferences)
+        {
+            if (reference.Name == "Newtonsoft.Json")
+            {
+                reference.Version = desired;
+                break;
+            }
+        }
+
+        //Remove the embedded Newtonsoft resource
+        modder.Module.Resources.Remove(
+            modder.Module.Resources.Single(x => x.Name.EndsWith("Newtonsoft.Json.dll"))
+        );
+    }
 }
 #endif

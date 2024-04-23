@@ -689,7 +689,7 @@ public class CSharpLoader
     {
         var toplevel = Path.Combine(PluginsDirectory, "mods"/*scripts are used by real scripts*/, GetTargetAssemblyDirectory());
         if (Directory.Exists(toplevel))
-            LoadSingleScripts(meta, toplevel, OutputKind.ConsoleApplication, "toplevel");
+            LoadSingleScripts(meta, toplevel, OutputKind.DynamicallyLinkedLibrary, "toplevel");
     }
 
     void LoadPatches(MetaData meta)

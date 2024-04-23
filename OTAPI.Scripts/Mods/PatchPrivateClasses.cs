@@ -19,22 +19,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if !tModLoader_V1_4
-System.Console.WriteLine("PatchPrivateClasses only needed for TML");
+#warning PatchPrivateClasses only needed for TML
 #else
 using ModFramework;
 using MonoMod;
 
-/// <summary>
-/// @doc Patches Terraria.Program to be pubic so that JIT methods can be accessed
-/// </summary>
-[Modification(ModType.PostPatch, "Patching various private methods for public access")]
 [MonoMod.MonoModIgnore]
-void PatchPrivateClasses(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    modder.Module.GetType("MonoLaunch").SetPublic(true);
-    modder.Module.GetType("Terraria.Program").SetPublic(true);
-    var iv = modder.Module.GetType("Terraria.ModLoader.Engine.InstallVerifier");
-    iv.SetPublic(true);
-    iv.Field("steamAPIPath").SetPublic(true);
+    /// <summary>
+    /// @doc Patches Terraria.Program to be pubic so that JIT methods can be accessed
+    /// </summary>
+    [Modification(ModType.PostPatch, "Patching various private methods for public access")]
+    [MonoMod.MonoModIgnore]
+    void PatchPrivateClasses(MonoModder modder)
+    {
+        modder.Module.GetType("MonoLaunch").SetPublic(true);
+        modder.Module.GetType("Terraria.Program").SetPublic(true);
+        var iv = modder.Module.GetType("Terraria.ModLoader.Engine.InstallVerifier");
+        iv.SetPublic(true);
+        iv.Field("steamAPIPath").SetPublic(true);
+    }
 }
 #endif

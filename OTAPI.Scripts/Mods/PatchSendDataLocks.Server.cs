@@ -29,84 +29,88 @@ using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil.Rocks;
 
-/// <summary>
-/// @doc Removes sync lock functionality in Terraria.NetMessage.SendData, used in conjunction with the SendDataWriter patch.
-/// </summary>
-[Modification(ModType.PreMerge, "Removing NetMessage.SendData locks")]
 [MonoMod.MonoModIgnore]
-void PatchSendDataLocks(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
+    /// <summary>
+    /// @doc Removes sync lock functionality in Terraria.NetMessage.SendData, used in conjunction with the SendDataWriter patch.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Removing NetMessage.SendData locks")]
+    [MonoMod.MonoModIgnore]
+    void PatchSendDataLocks(MonoModder modder)
+    {
 #if TerrariaServer_SendDataNumber8
-    var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
+        var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default, default));
 #else
-    var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
+        var SendData = modder.GetILCursor(() => Terraria.NetMessage.SendData(default, default, default, default, default, default, default, default, default, default, default));
 #endif
 
-    var locks = FindLocks(SendData);
+        var locks = FindLocks(SendData);
 
-    if (locks.Count() != 1)
-        throw new Exception($"{SendData.Method.FullName} expected only 1 lock.");
+        if (locks.Count() != 1)
+            throw new Exception($"{SendData.Method.FullName} expected only 1 lock.");
 
-    var the_lock = locks.Single();
+        var the_lock = locks.Single();
 
-    // transform short codes to actual variable references.
-    // this saves a bit of complexity in finding the variables to be removed
-    SendData.Body.SimplifyMacros();
+        // transform short codes to actual variable references.
+        // this saves a bit of complexity in finding the variables to be removed
+        SendData.Body.SimplifyMacros();
 
-    var startOfLock = FindStartOfLock(SendData, the_lock);
+        var startOfLock = FindStartOfLock(SendData, the_lock);
 
-    // leave any branches/transfers intact
-    startOfLock.Ins.OpCode = OpCodes.Nop;
-    startOfLock.Ins.Operand = null;
-    startOfLock = startOfLock.Next;
+        // leave any branches/transfers intact
+        startOfLock.Ins.OpCode = OpCodes.Nop;
+        startOfLock.Ins.Operand = null;
+        startOfLock = startOfLock.Next;
 
-    // remove the start of the lock
-    SendData.Goto(startOfLock.Ins);
-    SendData.RemoveWhile(ins => !(ins.Operand is MethodReference mref
+        // remove the start of the lock
+        SendData.Goto(startOfLock.Ins);
+        SendData.RemoveWhile(ins => !(ins.Operand is MethodReference mref
+                && mref.DeclaringType.FullName == "System.Threading.Monitor"
+                && mref.Name == "Enter"));
+
+        // remove the handler
+        SendData.Goto(the_lock.HandlerStart);
+        SendData.RemoveWhile(ins => SendData.Next.OpCode != OpCodes.Endfinally);
+
+        // remove the now useless try/finally
+        SendData.Body.ExceptionHandlers.Remove(the_lock);
+
+        // reapply optimisations that we undone
+        SendData.Body.OptimizeMacros();
+    }
+
+    [MonoMod.MonoModIgnore]
+    ILCount FindStartOfLock(ILCursor cursor, ExceptionHandler exlock)
+    {
+        cursor.Goto(exlock.TryStart);
+
+        if (exlock.TryStart.OpCode != OpCodes.Ldloc)
+            throw new Exception($"{cursor.Method.FullName} unable to determine the reference variable to remove the lock.");
+
+        var variable = (VariableDefinition)exlock.TryStart.Operand;
+
+        cursor.GotoPrev(ins => ins.OpCode == OpCodes.Stloc && ins.Operand == variable);
+
+        var count = cursor.Method.GetStack();
+        var offset = count.Single(x => x.Ins == cursor.Next);
+
+        return offset.FindRoot();
+    }
+
+    [MonoMod.MonoModIgnore]
+    IEnumerable<ExceptionHandler> FindLocks(ILCursor cursor)
+    {
+        // look for all endfinally instructions, and if the previous instruction is a Monitor.Exit we can assume it's a lock
+
+        var endfinally = cursor.Body.Instructions.Where(i => i.OpCode == OpCodes.Endfinally
+            && i.Previous?.Operand is MethodReference mref
             && mref.DeclaringType.FullName == "System.Threading.Monitor"
-            && mref.Name == "Enter"));
+            && mref.Name == "Exit"
+        );
 
-    // remove the handler
-    SendData.Goto(the_lock.HandlerStart);
-    SendData.RemoveWhile(ins => SendData.Next.OpCode != OpCodes.Endfinally);
-
-    // remove the now useless try/finally
-    SendData.Body.ExceptionHandlers.Remove(the_lock);
-
-    // reapply optimisations that we undone
-    SendData.Body.OptimizeMacros();
-}
-
-[MonoMod.MonoModIgnore]
-ILCount FindStartOfLock(ILCursor cursor, ExceptionHandler exlock)
-{
-    cursor.Goto(exlock.TryStart);
-
-    if (exlock.TryStart.OpCode != OpCodes.Ldloc)
-        throw new Exception($"{cursor.Method.FullName} unable to determine the reference variable to remove the lock.");
-
-    var variable = (VariableDefinition)exlock.TryStart.Operand;
-
-    cursor.GotoPrev(ins => ins.OpCode == OpCodes.Stloc && ins.Operand == variable);
-
-    var count = cursor.Method.GetStack();
-    var offset = count.Single(x => x.Ins == cursor.Next);
-
-    return offset.FindRoot();
-}
-
-[MonoMod.MonoModIgnore]
-IEnumerable<ExceptionHandler> FindLocks(ILCursor cursor)
-{
-    // look for all endfinally instructions, and if the previous instruction is a Monitor.Exit we can assume it's a lock
-
-    var endfinally = cursor.Body.Instructions.Where(i => i.OpCode == OpCodes.Endfinally
-        && i.Previous?.Operand is MethodReference mref
-        && mref.DeclaringType.FullName == "System.Threading.Monitor"
-        && mref.Name == "Exit"
-    );
-
-    return cursor.Body.ExceptionHandlers.Where(x => x.HandlerType == ExceptionHandlerType.Finally &&
-        endfinally.Any(ef => ef.Next == x.HandlerEnd));
+        return cursor.Body.ExceptionHandlers.Where(x => x.HandlerType == ExceptionHandlerType.Finally &&
+            endfinally.Any(ef => ef.Next == x.HandlerEnd));
+    }
 }
 

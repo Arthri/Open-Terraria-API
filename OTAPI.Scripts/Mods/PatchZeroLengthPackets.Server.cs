@@ -23,23 +23,27 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using MonoMod.Cil;
 
-/// <summary>
-/// @doc Prevent infinite server loop. refer to https://github.com/Pryaxis/TShock/issues/1673
-/// </summary>
-[Modification(ModType.PreMerge, "Patching zero-length packet exploits")]
 [MonoMod.MonoModIgnore]
-void PatchZeroLengthPackets(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    // find the only instance of ToUint16, get it's stored variable and add a 0 length check to break out
-    var checkBytes = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));
+    /// <summary>
+    /// @doc Prevent infinite server loop. refer to https://github.com/Pryaxis/TShock/issues/1673
+    /// </summary>
+    [Modification(ModType.PreMerge, "Patching zero-length packet exploits")]
+    [MonoMod.MonoModIgnore]
+    void PatchZeroLengthPackets(MonoModder modder)
+    {
+        // find the only instance of ToUint16, get it's stored variable and add a 0 length check to break out
+        var checkBytes = modder.GetILCursor(() => Terraria.NetMessage.CheckBytes(0));
 
-    var toUInt16 = checkBytes.GotoNext(MoveType.After, (ins) => ins.MatchCall("System.BitConverter", "ToUInt16"));
-    var storageVariable = toUInt16.Next.Operand as Mono.Cecil.Cil.VariableReference;
-    var breakTo = toUInt16.GotoNext((ins) => ins.OpCode == OpCodes.Blt || ins.OpCode == OpCodes.Blt_S).Next.Operand as Instruction;
+        var toUInt16 = checkBytes.GotoNext(MoveType.After, (ins) => ins.MatchCall("System.BitConverter", "ToUInt16"));
+        var storageVariable = toUInt16.Next.Operand as Mono.Cecil.Cil.VariableReference;
+        var breakTo = toUInt16.GotoNext((ins) => ins.OpCode == OpCodes.Blt || ins.OpCode == OpCodes.Blt_S).Next.Operand as Instruction;
 
-    toUInt16.Index++;
-    toUInt16
-        .Emit(OpCodes.Ldloc_S, storageVariable)
-        .Emit(OpCodes.Ldc_I4_0)
-        .Emit(OpCodes.Beq, breakTo);
+        toUInt16.Index++;
+        toUInt16
+            .Emit(OpCodes.Ldloc_S, storageVariable)
+            .Emit(OpCodes.Ldc_I4_0)
+            .Emit(OpCodes.Beq, breakTo);
+    }
 }

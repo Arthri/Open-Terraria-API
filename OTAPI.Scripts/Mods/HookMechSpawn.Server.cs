@@ -27,41 +27,45 @@ using Mono.Cecil.Cil;
 using MonoMod;
 using MonoMod.Cil;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.MechSpawn & Hooks.Item.MechSpawn. Allows plugins to react to Mech spawn events.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking statue spawning")]
-[MonoModIgnore]
-void HookMechSpawn(MonoModder modder)
+[MonoMod.MonoModIgnore]
+class B384680188CA4A9083017801C2A34C95
 {
-    HookMethod(modder, () => Terraria.NPC.MechSpawn(0, 0, 0), OTAPI.Hooks.NPC.InvokeMechSpawn);
-    HookMethod(modder, () => Terraria.Item.MechSpawn(0, 0, 0), OTAPI.Hooks.Item.InvokeMechSpawn);
-}
-
-[MonoModIgnore]
-void HookMethod(MonoModder modder, Expression<Action> method, Func<bool, float, float, int, int, int, int, bool> Callback)
-{
-    var csr = modder.GetILCursor(method);
-
-    //while (csr.TryFindNext(out ILCursor[] matches, ins => ins.OpCode == OpCodes.Ret))
-    var matches = csr.Body.Instructions.Where(x => x.OpCode == OpCodes.Ret).ToArray();
+    /// <summary>
+    /// @doc Creates Hooks.NPC.MechSpawn & Hooks.Item.MechSpawn. Allows plugins to react to Mech spawn events.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking statue spawning")]
+    [MonoModIgnore]
+    void HookMechSpawn(MonoModder modder)
     {
-        foreach (var ret in matches)
+        HookMethod(modder, () => Terraria.NPC.MechSpawn(0, 0, 0), OTAPI.Hooks.NPC.InvokeMechSpawn);
+        HookMethod(modder, () => Terraria.Item.MechSpawn(0, 0, 0), OTAPI.Hooks.Item.InvokeMechSpawn);
+    }
+
+    [MonoModIgnore]
+    void HookMethod(MonoModder modder, Expression<Action> method, Func<bool, float, float, int, int, int, int, bool> Callback)
+    {
+        var csr = modder.GetILCursor(method);
+
+        //while (csr.TryFindNext(out ILCursor[] matches, ins => ins.OpCode == OpCodes.Ret))
+        var matches = csr.Body.Instructions.Where(x => x.OpCode == OpCodes.Ret).ToArray();
         {
-            csr.Goto(ret, MoveType.Before);
+            foreach (var ret in matches)
+            {
+                csr.Goto(ret, MoveType.Before);
 
-            // add the method params to the stack.
-            foreach (var prm in csr.Method.Parameters)
-                csr.Emit(OpCodes.Ldarg, prm);
+                // add the method params to the stack.
+                foreach (var prm in csr.Method.Parameters)
+                    csr.Emit(OpCodes.Ldarg, prm);
 
-            var www = csr.Body.Variables.Where(x => x.VariableType == csr.Module.TypeSystem.Int32).Take(3);
-            if (www.Count() != 3)
-                throw new Exception($"{csr.Method.FullName} was expected to contain 3 integer variables.");
+                var www = csr.Body.Variables.Where(x => x.VariableType == csr.Module.TypeSystem.Int32).Take(3);
+                if (www.Count() != 3)
+                    throw new Exception($"{csr.Method.FullName} was expected to contain 3 integer variables.");
 
-            foreach (var lv in www)
-                csr.Emit(OpCodes.Ldloc, lv);
+                foreach (var lv in www)
+                    csr.Emit(OpCodes.Ldloc, lv);
 
-            csr.EmitDelegate(Callback);
+                csr.EmitDelegate(Callback);
+            }
         }
     }
 }

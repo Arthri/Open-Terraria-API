@@ -30,64 +30,68 @@ using MonoMod.Cil;
 using System;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Hooks.WorldGen.HardmodeTileUpdate. Allows plugins to intercept hard mode tile updates.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking hardmode tile updates")]
 [MonoMod.MonoModIgnore]
-void HardModeTileUpdates(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var tile = modder.GetFieldDefinition(() => Terraria.Main.tile);
-    var tileType = (tile.FieldType as ArrayType).ElementType;
-    var csr = modder.GetILCursor(() => Terraria.WorldGen.hardUpdateWorld(0, 0));
-
-    var targets = csr.Body.Instructions.Where(ins =>
-        //(instruction.Operand is FieldReference fieldRef) && fieldRef.FullName == tile.FullName
-        ins.OpCode == OpCodes.Stfld
-        && ins.Operand is FieldReference fieldRef
-        && fieldRef.DeclaringType.FullName == tileType.FullName
-        && fieldRef.Name == "type"
-    ).ToArray();
-
-    foreach (var match in targets)
+    /// <summary>
+    /// @doc Creates Hooks.WorldGen.HardmodeTileUpdate. Allows plugins to intercept hard mode tile updates.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking hardmode tile updates")]
+    [MonoMod.MonoModIgnore]
+    void HardModeTileUpdates(MonoModder modder)
     {
-        csr.Goto(match);
+        var tile = modder.GetFieldDefinition(() => Terraria.Main.tile);
+        var tileType = (tile.FieldType as ArrayType).ElementType;
+        var csr = modder.GetILCursor(() => Terraria.WorldGen.hardUpdateWorld(0, 0));
 
-        // move back to the tile collection being pushed on the stack, we will wrap this up until SendTileSquare
-        csr.GotoPrev(MoveType.Before, ins => ins.OpCode == OpCodes.Ldsfld && (ins.Operand as FieldReference).Name == "tile");
+        var targets = csr.Body.Instructions.Where(ins =>
+            //(instruction.Operand is FieldReference fieldRef) && fieldRef.FullName == tile.FullName
+            ins.OpCode == OpCodes.Stfld
+            && ins.Operand is FieldReference fieldRef
+            && fieldRef.DeclaringType.FullName == tileType.FullName
+            && fieldRef.Name == "type"
+        ).ToArray();
 
-        // store this for later. otherwise we need to cycle back to here, so its easier to just store it upfront
-        var startOfBranch = csr.Next;
-
-        // find the instruction to where our cancel code should end up.
-        csr.FindNext(out ILCursor[] continuation, ins => ins.OpCode == OpCodes.Call && (ins.Operand as MethodReference).Name == "SendTileSquare");
-
-        if (continuation.Length != 1)
-            throw new Exception($"{nameof(Terraria.WorldGen.hardUpdateWorld)} unable to determine continuation branch.");
-
-        var continueBranch = continuation[0].Next.Next;
-
-        // nop as a placeholder. it must take the transfer from other branches otherwise the if conditions won't align correctly.
-        var nop = csr.Emit(OpCodes.Nop).Prev;
-        startOfBranch.ReplaceTransfer(nop, csr.Method);
-
-        // add the x/y (params)
-        var param = startOfBranch.Next;
-        while (param.OpCode.FlowControl != FlowControl.Call)
+        foreach (var match in targets)
         {
-            csr.Emit(param.OpCode, param.Operand);
-            param = param.Next;
+            csr.Goto(match);
+
+            // move back to the tile collection being pushed on the stack, we will wrap this up until SendTileSquare
+            csr.GotoPrev(MoveType.Before, ins => ins.OpCode == OpCodes.Ldsfld && (ins.Operand as FieldReference).Name == "tile");
+
+            // store this for later. otherwise we need to cycle back to here, so its easier to just store it upfront
+            var startOfBranch = csr.Next;
+
+            // find the instruction to where our cancel code should end up.
+            csr.FindNext(out ILCursor[] continuation, ins => ins.OpCode == OpCodes.Call && (ins.Operand as MethodReference).Name == "SendTileSquare");
+
+            if (continuation.Length != 1)
+                throw new Exception($"{nameof(Terraria.WorldGen.hardUpdateWorld)} unable to determine continuation branch.");
+
+            var continueBranch = continuation[0].Next.Next;
+
+            // nop as a placeholder. it must take the transfer from other branches otherwise the if conditions won't align correctly.
+            var nop = csr.Emit(OpCodes.Nop).Prev;
+            startOfBranch.ReplaceTransfer(nop, csr.Method);
+
+            // add the x/y (params)
+            var param = startOfBranch.Next;
+            while (param.OpCode.FlowControl != FlowControl.Call)
+            {
+                csr.Emit(param.OpCode, param.Operand);
+                param = param.Next;
+            }
+
+            // find the tile type instruction and add it to our param stack.
+            csr.FindNext(out ILCursor[] csrTypes, ins => ins.OpCode == OpCodes.Ldc_I4_S || ins.OpCode == OpCodes.Ldc_I4);
+            if (csrTypes.Length != 1)
+                throw new Exception($"{nameof(Terraria.WorldGen.hardUpdateWorld)} unable to determine type instructions.");
+
+            csr.Emit(csrTypes[0].Next.OpCode, csrTypes[0].Next.Operand);
+
+            csr.EmitDelegate(OTAPI.Hooks.WorldGen.InvokeHardmodeTileUpdate);
+            csr.Emit(OpCodes.Brfalse_S, continueBranch);
         }
-
-        // find the tile type instruction and add it to our param stack.
-        csr.FindNext(out ILCursor[] csrTypes, ins => ins.OpCode == OpCodes.Ldc_I4_S || ins.OpCode == OpCodes.Ldc_I4);
-        if (csrTypes.Length != 1)
-            throw new Exception($"{nameof(Terraria.WorldGen.hardUpdateWorld)} unable to determine type instructions.");
-
-        csr.Emit(csrTypes[0].Next.OpCode, csrTypes[0].Next.Operand);
-
-        csr.EmitDelegate(OTAPI.Hooks.WorldGen.InvokeHardmodeTileUpdate);
-        csr.Emit(OpCodes.Brfalse_S, continueBranch);
     }
 }
 

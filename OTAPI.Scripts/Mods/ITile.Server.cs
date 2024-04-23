@@ -29,47 +29,51 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc Transforms Terraria.Tile into Terraria.ITile
-/// </summary>
-[Modification(ModType.PreMerge, "Implementing ITile", Dependencies = new[]{
-    "ITileCollection", // this mod uses Terraria.Tile directly so it will emit references to it that this needs to clean up
-    "ITileProperties", // properties required first, interfaces do not like instance fields
-})]
 [MonoMod.MonoModIgnore]
-void ITile(ModFwModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var tile = modder.GetDefinition<Terraria.Tile>();
-    var itile = tile.RemapAsInterface(modder);
-
-    // allow Terraria.Tile to be overridden 
-    modder.MakeVirtual(tile);
-
-    // replace ctor/new instances and route to a hook
+    /// <summary>
+    /// @doc Transforms Terraria.Tile into Terraria.ITile
+    /// </summary>
+    [Modification(ModType.PreMerge, "Implementing ITile", Dependencies = new[]{
+        "ITileCollection", // this mod uses Terraria.Tile directly so it will emit references to it that this needs to clean up
+        "ITileProperties", // properties required first, interfaces do not like instance fields
+    })]
+    [MonoMod.MonoModIgnore]
+    void ITile(ModFwModder modder)
     {
-        var createTile = modder.Module.ImportReference(modder.GetMethodDefinition(() => OTAPI.Hooks.Tile.InvokeCreate()));
-        var createTileRef = modder.Module.ImportReference(modder.GetMethodDefinition(() => OTAPI.Hooks.Tile.InvokeCreate(null)));
+        var tile = modder.GetDefinition<Terraria.Tile>();
+        var itile = tile.RemapAsInterface(modder);
 
-        modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
+        // allow Terraria.Tile to be overridden 
+        modder.MakeVirtual(tile);
+
+        // replace ctor/new instances and route to a hook
         {
-            if (instr.OpCode == OpCodes.Newobj && instr.Operand is MethodReference mref
-                && mref.DeclaringType.FullName == "Terraria.Tile"
-                && body.Method.Name != nameof(OTAPI.Hooks.Tile.InvokeCreate)
-            )
+            var createTile = modder.Module.ImportReference(modder.GetMethodDefinition(() => OTAPI.Hooks.Tile.InvokeCreate()));
+            var createTileRef = modder.Module.ImportReference(modder.GetMethodDefinition(() => OTAPI.Hooks.Tile.InvokeCreate(null)));
+
+            modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
             {
-                if (mref.Parameters.Count == 0)
+                if (instr.OpCode == OpCodes.Newobj && instr.Operand is MethodReference mref
+                    && mref.DeclaringType.FullName == "Terraria.Tile"
+                    && body.Method.Name != nameof(OTAPI.Hooks.Tile.InvokeCreate)
+                )
                 {
-                    instr.OpCode = OpCodes.Call;
-                    instr.Operand = createTile;
+                    if (mref.Parameters.Count == 0)
+                    {
+                        instr.OpCode = OpCodes.Call;
+                        instr.Operand = createTile;
+                    }
+                    else if (mref.Parameters.Count == 1)
+                    {
+                        instr.OpCode = OpCodes.Call;
+                        instr.Operand = createTileRef;
+                    }
+                    else throw new NotImplementedException();
                 }
-                else if (mref.Parameters.Count == 1)
-                {
-                    instr.OpCode = OpCodes.Call;
-                    instr.Operand = createTileRef;
-                }
-                else throw new NotImplementedException();
-            }
-        };
+            };
+        }
     }
 }
 

@@ -26,21 +26,25 @@ using MonoMod;
 using System;
 using System.Linq;
 
-/// <summary>
-/// @doc Creates Hooks.NPC.Transform. Allows plugins to cancel NPC killed events.
-/// </summary>
-[Modification(ModType.PreMerge, "Hooking Npc.Transform")]
 [MonoMod.MonoModIgnore]
-void HookNpcTransform(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var transform = modder.GetILCursor(() => (new Terraria.NPC()).Transform(0));
+    /// <summary>
+    /// @doc Creates Hooks.NPC.Transform. Allows plugins to cancel NPC killed events.
+    /// </summary>
+    [Modification(ModType.PreMerge, "Hooking Npc.Transform")]
+    [MonoMod.MonoModIgnore]
+    void HookNpcTransform(MonoModder modder)
+    {
+        var transform = modder.GetILCursor(() => (new Terraria.NPC()).Transform(0));
 
-    transform.GotoNext(ins => ins.Operand is FieldReference fr && fr.Name == "netMode" && ins.Next.OpCode == OpCodes.Ldc_I4_2);
-    transform.Emit(OpCodes.Ldarg_0);
-    transform.Emit(OpCodes.Ldarga, transform.Method.Parameters.Single());
-    transform.EmitDelegate(OTAPI.Hooks.NPC.InvokeTransforming);
-    transform.Emit(OpCodes.Brtrue, transform.Next);
-    transform.Emit(OpCodes.Ret);
+        transform.GotoNext(ins => ins.Operand is FieldReference fr && fr.Name == "netMode" && ins.Next.OpCode == OpCodes.Ldc_I4_2);
+        transform.Emit(OpCodes.Ldarg_0);
+        transform.Emit(OpCodes.Ldarga, transform.Method.Parameters.Single());
+        transform.EmitDelegate(OTAPI.Hooks.NPC.InvokeTransforming);
+        transform.Emit(OpCodes.Brtrue, transform.Next);
+        transform.Emit(OpCodes.Ret);
+    }
 }
 
 namespace OTAPI

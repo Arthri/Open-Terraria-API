@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma warning disable CS8321 // Local function is declared but never used
 
 #if !tModLoader_V1_4
-System.Console.WriteLine("MonoMod patch only needed for TML");
+#warning MonoMod patch only needed for TML
 #else
 using System;
 using System.Linq;
@@ -28,20 +28,24 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod;
 
-/// <summary>
-/// @doc A mod that changes the base path of native assembly loading
-/// </summary>
-[Modification(ModType.PostPatch, "Updating native assembly loading")]
 [MonoMod.MonoModIgnore]
-void PathMonoLaunch(MonoModder modder)
+class B384680188CA4A9083017801C2A34C95
 {
-    var mth = modder.Module.GetType("MonoLaunch").Methods.Single(m => m.Name == "ResolveNativeLibrary");
-    var rnl = modder.GetILCursor(mth);
-    var gbd = modder.GetMethodDefinition(() => patch_MonoLaunch.GetBaseDirectory(), followRedirect: true);
+    /// <summary>
+    /// @doc A mod that changes the base path of native assembly loading
+    /// </summary>
+    [Modification(ModType.PostPatch, "Updating native assembly loading")]
+    [MonoMod.MonoModIgnore]
+    void PathMonoLaunch(MonoModder modder)
+    {
+        var mth = modder.Module.GetType("MonoLaunch").Methods.Single(m => m.Name == "ResolveNativeLibrary");
+        var rnl = modder.GetILCursor(mth);
+        var gbd = modder.GetMethodDefinition(() => patch_MonoLaunch.GetBaseDirectory(), followRedirect: true);
 
-    rnl.GotoNext(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.Name == "get_CurrentDirectory");
+        rnl.GotoNext(i => i.OpCode == OpCodes.Call && i.Operand is MethodReference mref && mref.Name == "get_CurrentDirectory");
 
-    rnl.Next.Operand = gbd;
+        rnl.Next.Operand = gbd;
+    }
 }
 
 public static partial class patch_MonoLaunch
