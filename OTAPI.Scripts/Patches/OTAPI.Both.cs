@@ -106,6 +106,7 @@ namespace OTAPI
         /// </summary>
         public static readonly string GitHubActionRunNo = GetMetaData("GitHub.Action.RunNo");
 
+#if !TerrariaServer
         public static partial class ModFramework
         {
             /// <summary>
@@ -113,5 +114,6 @@ namespace OTAPI
             /// </summary>
             public static readonly string Version = GetVersion(typeof(global::ModFramework.ModFwModder).Assembly);
         }
+#endif
     }
 }
