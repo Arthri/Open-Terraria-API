@@ -22,7 +22,7 @@ using ModFramework;
 using MonoMod;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc A mod to change the Terraria or TerrariaServer name to OTAPI so cross platform plugins only need to reference one assembly name

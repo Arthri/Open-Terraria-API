@@ -27,7 +27,7 @@ using System;
 using Terraria.DataStructures;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Creates Hooks.NPC.Create. Allows plugins to create NPC instances.

@@ -24,7 +24,7 @@ using ModFramework;
 using Mono.Cecil.Cil;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc A mod to insert Hooks.NetMessage.CheckBytesException and will default to printing to the console

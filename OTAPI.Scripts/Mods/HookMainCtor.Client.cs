@@ -25,7 +25,7 @@ using Mono.Cecil.Cil;
 using MonoMod;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Creates Hooks.Main.Create. Allows plugins to extend and return a custom Terraria.Main instance.

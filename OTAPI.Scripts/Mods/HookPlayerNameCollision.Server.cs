@@ -26,7 +26,7 @@ using Mono.Cecil.Cil;
 using MonoMod;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Creates Hooks.MessageBuffer.NameCollision. Allows plugins to control and cancel name collisions when 2 players join with the same name.

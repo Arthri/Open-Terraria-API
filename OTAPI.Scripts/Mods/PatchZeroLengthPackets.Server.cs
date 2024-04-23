@@ -24,7 +24,7 @@ using MonoMod;
 using MonoMod.Cil;
 
 [MonoMod.MonoModIgnore]
-file static class B384680188CA4A9083017801C2A34C95
+static class B384680188CA4A9083017801C2A34C95
 {
     /// <summary>
     /// @doc Prevent infinite server loop. refer to https://github.com/Pryaxis/TShock/issues/1673
