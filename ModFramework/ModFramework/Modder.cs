@@ -222,7 +222,13 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
     {
         // This has to be run before MonoMod relinks
         // otherwise we'll end up with broken references
-        RunTasks(t => t.Relink(method));
+        foreach (var task in TaskList)
+        {
+            if (task is CoreLibRelinker)
+            {
+                task.Relink(method);
+            }
+        }
 
         base.PatchRefsInMethod(method);
 
