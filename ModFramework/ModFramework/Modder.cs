@@ -91,6 +91,7 @@ public class ModFwModder : MonoMod.MonoModder, IRelinkProvider
 
     public ModFwModder(ModContext context)
     {
+        Environment.SetEnvironmentVariable("MONOMOD_CLEANUP_ALL", "1");
         ModContext = context;
         MethodParser = (MonoModder modder, MethodBody body, Instruction instr, ref int instri) => true;
         MethodRewriter = (MonoModder modder, MethodDefinition method) =>
