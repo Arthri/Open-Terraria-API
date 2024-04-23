@@ -38,6 +38,12 @@ public class TMLPCServerTarget : PCServerTarget
     public override bool PublicEverything => false; // tml expects various classes to still be private
     public override bool GenerateSymbols => false; // write currently throws an exception. havent had the chance to fix the problem yet
 
+    public TMLPCServerTarget()
+    {
+        // deletes Terraria.ModLoader.MonoModHooks and breaks tML
+        Environment.SetEnvironmentVariable("MONOMOD_CLEANUP_ALL", "0");
+    }
+
     public override void AddSearchDirectories(ModFwModder modder)
     {
         base.AddSearchDirectories(modder);
@@ -58,9 +64,6 @@ public class TMLPCServerTarget : PCServerTarget
 
     public override void LoadModifications()
     {
-        // deletes Terraria.ModLoader.MonoModHooks and breaks tML
-        Environment.SetEnvironmentVariable("MONOMOD_CLEANUP_ALL", "0");
-
         base.LoadModifications();
 
         ModContext.ReferenceFiles.Add(Path.Combine("tModLoader", "Libraries", "FNA", "1.0.0", "FNA.dll"));
