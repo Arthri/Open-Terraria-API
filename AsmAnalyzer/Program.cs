@@ -35,6 +35,7 @@ Log.Logger = new LoggerConfiguration()
 var logFactory = new SerilogLoggerFactory();
 
 var logger = logFactory.CreateLogger("Main");
+var exit = 0;
 
 var filesToAnalyze = args;
 foreach (var file in filesToAnalyze)
@@ -82,6 +83,11 @@ foreach (var file in filesToAnalyze)
                                 flaggedReferences.Add(typeReference.MetadataToken);
                             }
                         }
+
+                        if (flaggedReferences.Count != 0)
+                        {
+                            exit = 1;
+                        }
                     }
 
                     new ModuleAnalyzer(logger, module, flaggedReferences).Analyze();
@@ -96,3 +102,5 @@ foreach (var file in filesToAnalyze)
         }
     }
 }
+
+return exit;
