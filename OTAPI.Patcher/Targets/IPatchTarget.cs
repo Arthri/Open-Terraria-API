@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static ModFramework.ModContext;
 
 namespace OTAPI.Patcher.Targets;
@@ -34,7 +35,7 @@ public interface IPatchTarget
 {
     string DisplayText { get; }
     string InstallDestination { get; }
-    void Patch();
+    Task PatchAsync();
 }
 
 [MonoMod.MonoModIgnore]
@@ -83,9 +84,9 @@ public static partial class PatchTargetExtensions
         if (Directory.Exists(outputFolder)) Directory.Delete(outputFolder, true);
         Directory.CreateDirectory(outputFolder);
 
-        File.Copy("../../../../COPYING.txt", Path.Combine(outputFolder, "COPYING.txt"));
-        File.Copy("OTAPI.dll", Path.Combine(outputFolder, "OTAPI.dll"));
-        File.Copy("OTAPI.Runtime.dll", Path.Combine(outputFolder, "OTAPI.Runtime.dll"));
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "../../../../COPYING.txt"), Path.Combine(outputFolder, "COPYING.txt"));
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "OTAPI.dll"), Path.Combine(outputFolder, "OTAPI.dll"));
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "OTAPI.Runtime.dll"), Path.Combine(outputFolder, "OTAPI.Runtime.dll"));
     }
 
     public static void AddEnvMetadata(this ModFwModder modder)
@@ -124,7 +125,7 @@ public static partial class PatchTargetExtensions
 
             GACPaths = new string[] { } // avoid MonoMod looking up the GAC, which causes an exception on .netcore
         };
-        mm.Log($"[OTAPI] Processing corelibs to be net6: {fileName}");
+        mm.Log($"[OTAPI] Processing corelibs to be net9: {fileName}");
 
         mm.Read();
 
@@ -159,6 +160,8 @@ public static partial class PatchTargetExtensions
             constants.Add($"{inputName}_1442_OrAbove");
         if (version >= new Version("1.4.4.8"))
             constants.Add($"{inputName}_1448_OrAbove");
+        if (version >= new Version("1.4.5"))
+            constants.Add($"{inputName}_1450_OrAbove");
 
         target.ModContext.ReferenceConstants.AddRange(constants.Select(x => $"#define {x}"));
 

@@ -57,17 +57,19 @@ void OnPacketWrite(MonoModder modder)
     callback.Parameters.Add(new ParameterDefinition("ms", ParameterAttributes.None, ms.VariableType));
     callback.Parameters.Add(new ParameterDefinition("bw", ParameterAttributes.None, bw.VariableType));
 
-    sendData.GotoNext(ins => ins.Operand is MethodReference mr && mr.Name == "IsConnected" && mr.DeclaringType.Name == "ISocket");
+    sendData.GotoNext(ins => ins.Operand is MethodReference mr && mr.Name == "IsConnected" && (
+        mr.DeclaringType.Name == "ISocket" || mr.DeclaringType.Name == "RemoteServer"
+    ));
     sendData.GotoPrev(ins => ins.Operand is FieldReference fr && fr.Name == "netMode" && fr.DeclaringType.Name == "Main");
 
     sendData.Emit(OpCodes.Ldloc, bufferID);
     sendData.Emit(OpCodes.Ldloc, ms);
     sendData.Emit(OpCodes.Ldloc, bw);
 
-    foreach (var method in sendData.Method.Parameters)
+    foreach (var prm in sendData.Method.Parameters)
     {
-        callback.Parameters.Add(method.Clone());
-        sendData.Emit(OpCodes.Ldarg, method);
+        callback.Parameters.Add(prm.Clone());
+        sendData.Emit(OpCodes.Ldarg, prm);
     }
 
     sendData.Emit(OpCodes.Call, callback);

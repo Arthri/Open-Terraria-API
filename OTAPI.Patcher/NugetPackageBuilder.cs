@@ -59,7 +59,7 @@ public class NugetPackageBuilder
         var commitSha = Common.GetGitCommitSha();
         nuspec_xml = nuspec_xml.Replace("[INJECT_GIT_HASH]", String.IsNullOrWhiteSpace(commitSha) ? "" : $" git#{commitSha}");
 
-        var platforms = new[] { "net6.0" }; // relinker only does net6 currently. until there is a reason to implement it...
+        var platforms = new[] { "net9.0" }; // relinker only does net9 currently. until there is a reason to implement it...
         var steamworks = modder.Module.AssemblyReferences.First(x => x.Name == "Steamworks.NET");
         var newtonsoft = modder.Module.AssemblyReferences.First(x => x.Name == "Newtonsoft.Json");
         var dependencies = new[]
@@ -89,19 +89,22 @@ public class NugetPackageBuilder
             var packageBuilder = new NuGet.Packaging.PackageBuilder();
             packageBuilder.Populate(manifest.Metadata);
 
-            packageBuilder.AddFiles("../../../../", "COPYING.txt", "COPYING.txt");
+            var basePath = Path.Combine(AppContext.BaseDirectory, "../../../../");
+            packageBuilder.AddFiles(basePath, "COPYING.txt", "COPYING.txt");
 
             foreach (var platform in platforms)
             {
                 var dest = Path.Combine("lib", platform);
-                packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.dll", dest);
-                packageBuilder.AddFiles(Environment.CurrentDirectory, "OTAPI.Runtime.dll", dest);
+                packageBuilder.AddFiles(AppContext.BaseDirectory, "OTAPI.dll", dest);
+                packageBuilder.AddFiles(AppContext.BaseDirectory, "OTAPI.Runtime.dll", dest);
             }
 
-            if (File.Exists(PackageName))
-                File.Delete(PackageName);
+            var output = Path.Combine(AppContext.BaseDirectory, PackageName);
 
-            using (var srm = File.OpenWrite(PackageName))
+            if (File.Exists(output))
+                File.Delete(output);
+
+            using (var srm = File.OpenWrite(output))
                 packageBuilder.Save(srm);
         }
     }

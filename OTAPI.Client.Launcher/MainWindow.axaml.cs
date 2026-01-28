@@ -20,14 +20,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Newtonsoft.Json.Linq;
 using OTAPI.Client.Launcher.Targets;
 using OTAPI.Common;
 using OTAPI.Patcher.Targets;
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace OTAPI.Client.Launcher;
 
@@ -85,9 +84,10 @@ public partial class MainWindow : Window
     private void OnConsoleLineReceived(string line)
     {
         Context.Console.Insert(0, $"[{DateTime.Now:yyyyMMdd HH:mm:ss}] {line}");
+        System.Diagnostics.Debug.WriteLine($"[OTAPI.Launcher] {line}");
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
         _watcher?.Dispose();
@@ -204,13 +204,17 @@ public partial class MainWindow : Window
         process.Start();
     }
 
+    System.Threading.CancellationTokenSource CancellationTokenSource { get; set; } = new System.Threading.CancellationTokenSource();
+
     public void OnInstall(object sender, RoutedEventArgs e)
     {
         if (Context.IsInstalling || Context.InstallPath?.Path is null || Context.LaunchTarget is null) return;
         Context.IsInstalling = true;
 
-        new System.Threading.Thread(() =>
+        Task.Run(async () =>
         {
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource = new();
             try
             {
                 var target = new PCClientTarget();
@@ -221,7 +225,7 @@ public partial class MainWindow : Window
                 Context.InstallStatus = "Patching completed, installing to existing installation...";
 
                 Context.InstallPath.Target.StatusUpdate += (sender, e) => Context.InstallStatus = e.Text;
-                Context.InstallPath.Target.Install(Context.InstallPath.Path);
+                await Context.InstallPath.Target.InstallAsync(Context.InstallPath.Path, CancellationTokenSource.Token);
 
                 Context.InstallStatus = "Install completed";
 
@@ -235,6 +239,6 @@ public partial class MainWindow : Window
                 Context.InstallStatus = "Err: " + ex.ToString();
                 OnConsoleLineReceived(ex.ToString());
             }
-        }).Start();
+        });
     }
 }

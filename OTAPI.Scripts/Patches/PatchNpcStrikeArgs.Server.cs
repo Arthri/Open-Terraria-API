@@ -30,71 +30,98 @@ using System.Linq;
 [MonoModIgnore]
 partial class NpcStrikeArgs
 {
-    static ParameterDefinition Entity { get; set; }
-    static MethodDefinition StrikeNPC { get; set; }
-
     [Modification(ModType.PreMerge, "Patching in entity source for NPC strike")]
     static void PatchNpcStrikeArgs(ModFwModder modder)
     {
+#if TerrariaServer_1450_OrAbove || Terraria__1450_OrAbove || tModLoader_1450_OrAbove
+        var csr = modder.GetILCursor(() => (new Terraria.NPC()).StrikeNPC(0, 0, 0, false, false, false, 0));
+#else
         var csr = modder.GetILCursor(() => (new Terraria.NPC()).StrikeNPC(0, 0, 0, false, false, false));
-        StrikeNPC = csr.Method;
+#endif
+        
+        var redirects = csr.Method.DeclaringType.Methods
+            .Where(x => (HookEmitter.HookMethodNamePrefix + x.Name) == csr.Method.Name || ("orig_" + x.Name) == csr.Method.Name)
+            .Select(x => x.GetILCursor())
+            .ToArray();
 
-        csr.Method.Parameters.Add(Entity = new ParameterDefinition("entity",
-            ParameterAttributes.HasDefault | ParameterAttributes.Optional,
-
-            modder.Module.ImportReference(modder.GetDefinition<Terraria.Entity>())
-        )
+        foreach (var method in redirects.Append(csr))
         {
-            Constant = null
-        });
+            ParameterDefinition Entity;
+            method.Method.Parameters.Add(Entity = new ("entity",
+                ParameterAttributes.HasDefault | ParameterAttributes.Optional,
 
-        modder.OnRewritingMethodBody += Modder_OnRewritingMethodBody;
-    }
-
-    private static void Modder_OnRewritingMethodBody(MonoModder modder, MethodBody body, Instruction instr, int instri)
-    {
-        if (instr.Operand is MethodReference methodReference)
-        {
-            if (methodReference.DeclaringType.Name == StrikeNPC.DeclaringType.Name
-                && methodReference.Name == StrikeNPC.Name)
+                modder.Module.ImportReference(modder.GetDefinition<Terraria.Entity>())
+            )
             {
-                if (methodReference.Parameters.Any(x => x.Name == Entity.Name))
+                Constant = null
+            });
+
+            modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
+            {
+                if (instr.Operand is MethodReference methodReference)
                 {
-                    return;
+                    if (methodReference.DeclaringType.Name == method.Method.DeclaringType.Name
+                        && methodReference.Name == method.Method.Name)
+                    {
+                        if (methodReference.Parameters.Any(x => x.Name == Entity.Name))
+                        {
+                            return;
+                        }
+                        methodReference.Parameters.Add(Entity);
+
+                        var methodName = body.Method.DeclaringType.Name + "." + body.Method.Name;
+                        switch (methodName.Replace(HookEmitter.HookMethodNamePrefix, ""))
+                        {
+                            case "MessageBuffer.GetData":
+                                var playerRef = Instruction.Create(OpCodes.Ldsfld, modder.Module.ImportReference(modder.GetFieldDefinition(() => Terraria.Main.player)));
+                                body.GetILProcessor().InsertBefore(instr, playerRef);
+                                body.GetILProcessor().InsertBefore(instr,
+                                    new { OpCodes.Ldarg_0 }, 
+                                    new { OpCodes.Ldfld, Operand = modder.Module.ImportReference(modder.GetFieldDefinition(() => (new Terraria.MessageBuffer()).whoAmI)) }, 
+                                    new { OpCodes.Ldelem_Ref } 
+                                ); 
+
+                                var hasWhoAmI = instr.Previous.OpCode == OpCodes.Ldfld &&
+                                    instr.Previous.Operand is FieldReference fieldReference && 
+                                    fieldReference.Name == "whoAmI";                                     
+                                if (hasWhoAmI) { // 145+  
+                                    // rewire the branching
+                                    var brs = instr.Previous(x => x.OpCode == OpCodes.Br_S);
+                                    brs.Operand = playerRef;
+                                } 
+                                break;
+
+                            case "NPC.StrikeNPCNoInteraction":
+                                // this is via world, so null is expected.
+                                body.GetILProcessor().InsertBefore(instr,
+                                    new { OpCodes.Ldnull }
+                                );
+                                break;
+
+                            case "Player.ApplyDamageToNPC":
+                            case "Player.ItemCheck_MeleeHitNPCs":
+                            case "Projectile.Damage":
+                            case "Player.ProcessHitAgainstNPC":
+                            case "NPC.StrikeNPC":
+                                body.GetILProcessor().InsertBefore(instr,
+                                    new { OpCodes.Ldarg_0 }
+                                );
+                                break;
+
+                            case "Projectile.Damage_PVE_Inner":
+                                // find the NPC parameter
+                                var prm = body.Method.Parameters.Single(x => x.ParameterType.FullName == "Terraria.NPC");
+                                body.GetILProcessor().InsertBefore(instr,
+                                    new { OpCodes.Ldarg, Operand = prm }
+                                );
+                                break;
+
+                            default:
+                                throw new NotImplementedException($"{body.Method.FullName} is not a supported caller for this modification");
+                        }
+                    }
                 }
-                methodReference.Parameters.Add(Entity);
-
-                switch (body.Method.DeclaringType.Name + "." + body.Method.Name)
-                {
-                    case "MessageBuffer.GetData":
-                        body.GetILProcessor().InsertBefore(instr,
-                            new { OpCodes.Ldsfld, Operand = modder.Module.ImportReference(modder.GetFieldDefinition(() => Terraria.Main.player)) },
-                            new { OpCodes.Ldarg_0 },
-                            new { OpCodes.Ldfld, Operand = modder.Module.ImportReference(modder.GetFieldDefinition(() => (new Terraria.MessageBuffer()).whoAmI)) },
-                            new { OpCodes.Ldelem_Ref }
-                        );
-                        break;
-
-                    case "NPC.StrikeNPCNoInteraction":
-                        // this is via world, so null is expected.
-                        body.GetILProcessor().InsertBefore(instr,
-                            new { OpCodes.Ldnull }
-                        );
-                        break;
-
-                    case "Player.ApplyDamageToNPC":
-                    case "Player.ItemCheck_MeleeHitNPCs":
-                    case "Projectile.Damage":
-                    case "Player.ProcessHitAgainstNPC":
-                        body.GetILProcessor().InsertBefore(instr,
-                            new { OpCodes.Ldarg_0 }
-                        );
-                        break;
-
-                    default:
-                        throw new NotImplementedException($"{body.Method.Name} is not a supported caller for this modification");
-                }
-            }
+            };
         }
     }
 }

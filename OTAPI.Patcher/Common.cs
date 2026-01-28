@@ -23,6 +23,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OTAPI.Patcher;
 
@@ -31,9 +32,10 @@ public static partial class Common
 {
     public static string GetVersion()
     {
-        return typeof(Common).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            .InformationalVersion;
+        var attr = typeof(Common).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>() ??
+            throw new Exception("Unable to get version attribute");
+        return attr.InformationalVersion;
     }
 
     public static void Log(string message)
@@ -41,14 +43,14 @@ public static partial class Common
         Console.WriteLine($"[ModFw] {message}");
     }
 
-    public static string GetCliValue(string key)
+    public static string? GetCliValue(string key)
     {
         string find = $"-{key}=";
         var match = Array.Find(Environment.GetCommandLineArgs(), x => x.StartsWith(find, StringComparison.CurrentCultureIgnoreCase));
         return match?.Substring(find.Length)?.ToLower();
     }
 
-    public static string GetGitCommitSha()
+    public static string? GetGitCommitSha()
     {
         var commitSha = Environment.GetEnvironmentVariable("GITHUB_SHA")?.Trim();
         if (commitSha != null && commitSha.Length >= 7)
@@ -58,7 +60,7 @@ public static partial class Common
         return null;
     }
 
-    public static string DownloadZip(string url)
+    public static async Task<string> DownloadZipAsync(string url)
     {
         Console.WriteLine($"Downloading {url}");
         var uri = new Uri(url);
@@ -72,24 +74,8 @@ public static partial class Common
             {
                 Directory.CreateDirectory(saveDir);
                 using var client = new HttpClient();
-                using var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
-                try
-                {
-                    using var data = client.GetStreamAsync(url).GetAwaiter().GetResult();
-                    data.CopyTo(fileStream);
-                }
-                catch
-                {
-                    try
-                    {
-                        File.Delete(savePath);
-                    }
-                    catch
-                    {
-                    }
-
-                    throw;
-                }
+                var data = await client.GetByteArrayAsync(url);
+                File.WriteAllBytes(savePath, data);
             }
 
             return savePath;
@@ -133,6 +119,7 @@ public static partial class Common
         {
             if (header) return HeaderFormat;
 
+            if (data?.FilePath is null) throw new Exception("Unable to determine ");
             var filename = Path.GetFileName(data.FilePath);
             var client = data.FilePath.Contains("patchtime", StringComparison.CurrentCultureIgnoreCase);
 
