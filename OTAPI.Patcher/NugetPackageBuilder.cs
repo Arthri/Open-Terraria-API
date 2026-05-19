@@ -37,11 +37,18 @@ public class NugetPackageBuilder
 
     public string PackageName { get; set; }
     public string NuspecPath { get; set; }
+    private readonly bool _addSteamworksNET;
 
     public NugetPackageBuilder(string packageName, string nuspecPath)
     {
         PackageName = packageName;
         NuspecPath = nuspecPath;
+        _addSteamworksNET = true;
+    }
+
+    public NugetPackageBuilder(string packageName, string nuspecPath, bool addSteamworksNET) : this(packageName, nuspecPath)
+    {
+        _addSteamworksNET = addSteamworksNET;
     }
 
     public void Build(ModFwModder modder)
@@ -60,10 +67,14 @@ public class NugetPackageBuilder
             (typeof(ModFwModder).Assembly.GetName().Name, Version: GetNugetVersionFromAssembly<ModFwModder>()),
             (typeof(MonoMod.MonoModder).Assembly.GetName().Name, Version: typeof(MonoMod.MonoModder).Assembly.GetName().Version.ToString()),
             (typeof(MonoMod.RuntimeDetour.DetourBase).Assembly.GetName().Name, Version: typeof(MonoMod.RuntimeDetour.DetourBase).Assembly.GetName().Version.ToString()),
-            (steamworks.Name, Version: steamworks.Version.ToString()),
             (newtonsoft.Name, Version: GetNugetVersionFromAssembly<Newtonsoft.Json.JsonConverter>().Split('+')[0]),
             (Name: "System.IO.Packaging", Version: GetNugetVersionFromAssembly<System.IO.Packaging.ZipPackage>().Split('+')[0]),
-        };
+        }.AsEnumerable();
+
+        if (_addSteamworksNET)
+        {
+            dependencies = dependencies.Append((steamworks.Name, Version: steamworks.Version.ToString()));
+        }
 
         var xml_dependency = String.Join("", dependencies.Select(dep => $"\n\t    <dependency id=\"{dep.Name}\" version=\"{dep.Version}\" />"));
         var xml_group = String.Join("", platforms.Select(platform => $"\n\t<group targetFramework=\"{platform}\">{xml_dependency}\n\t</group>"));
@@ -99,4 +110,3 @@ public class NugetPackageBuilder
         }
     }
 }
-

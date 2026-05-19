@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright (C) 2020 DeathCradle
 
 This file is part of Open Terraria API v3 (OTAPI)
@@ -67,10 +67,12 @@ public static partial class Common
         string filename = Path.GetFileName(uri.AbsolutePath);
         if (!String.IsNullOrWhiteSpace(filename))
         {
-            var savePath = Path.Combine(Environment.CurrentDirectory, filename);
+            var saveDir = Path.Combine(Path.GetTempPath(), "OTAPI", "Patcher");
+            var savePath = Path.Combine(saveDir, filename);
 
             if (!File.Exists(savePath))
             {
+                Directory.CreateDirectory(saveDir);
                 using var client = new HttpClient();
                 var data = await client.GetByteArrayAsync(url);
                 File.WriteAllBytes(savePath, data);
@@ -94,7 +96,15 @@ public static partial class Common
         if (!info.Exists || info.GetDirectories().Length == 0)
         {
             info.Create();
-            ZipFile.ExtractToDirectory(zipPath, directory);
+            try
+            {
+                ZipFile.ExtractToDirectory(zipPath, directory);
+            }
+            catch
+            {
+                Directory.Delete(directory);
+                throw;
+            }
         }
 
         return directory;

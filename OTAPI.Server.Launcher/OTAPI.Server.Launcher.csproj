@@ -5,6 +5,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<PreserveCompilationContext>true</PreserveCompilationContext>
 		<Configurations>Debug;Release</Configurations>
+		<RuntimeExampleServerTargetDir>$(MSBuildThisFileDirectory)../examples/RuntimeExample.Server/bin/$(Configuration)/$(TargetFramework)/</RuntimeExampleServerTargetDir>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -95,8 +96,8 @@
 		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.Lua.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
 		<Copy SourceFiles="$(TargetDir)ModFramework.Modules.ClearScript.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
 
-		<Copy SourceFiles="$(TargetDir)RuntimeExample.Server.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
-		<Copy SourceFiles="$(TargetDir)RuntimeExample.Server.pdb" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
+		<Copy SourceFiles="$(RuntimeExampleServerTargetDir)RuntimeExample.Server.dll" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
+		<Copy SourceFiles="$(RuntimeExampleServerTargetDir)RuntimeExample.Server.pdb" DestinationFolder="$(TargetDir)modifications" SkipUnchangedFiles="false" />
 	</Target>
 
 </Project>
