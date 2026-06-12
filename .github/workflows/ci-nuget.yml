@@ -36,7 +36,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: Ubuntu PC NuGet Package
-          run-id: ${{ steps.get-run.id.outputs.workflow-id }}
+          run-id: ${{ steps.get-run-id.outputs.workflow-id }}
           path: ${{ env.PACKAGES_PATH }}
           merge-multiple: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
