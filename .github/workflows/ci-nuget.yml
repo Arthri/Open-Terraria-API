@@ -28,7 +28,12 @@ jobs:
               'https://api.github.com/repos/'"$GITHUB_REPOSITORY"'/actions/workflows/ci.yml/runs?branch=upcoming&per_page=1'
           )"
 
-          workflow_id="$(jq '.workflow_runs[1].id' <<<$workflows_json)"
+          IFS=$'\n' read -d '' -r workflow_id workflow_conclusion <<<$(jq '.workflow_runs[0].id, .workflow_runs[0].conclusion' <<<$workflows_json)
+
+          if [[ "$workflow_conclusion" != "success" ]]; then
+            echo 'Last workflow run is not successful.'
+            exit 1
+          fi
 
           echo 'workflow-id='"$workflow_id" >> "$GITHUB_OUTPUT"
 
