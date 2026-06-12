@@ -10,7 +10,7 @@ env:
 
 jobs:
 
-  Server:
+  publish:
     runs-on: ubuntu-26.04
     environment: NuGet (Stable)
     permissions:
