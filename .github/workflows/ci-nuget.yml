@@ -28,7 +28,8 @@ jobs:
               'https://api.github.com/repos/'"$GITHUB_REPOSITORY"'/actions/workflows/ci.yml/runs?branch=upcoming&per_page=1'
           )"
 
-          IFS=$'\n' read -d '' -r workflow_id workflow_conclusion <<<$(jq '.workflow_runs[0].id, .workflow_runs[0].conclusion' <<<$workflows_json)
+          # heredocs do not have the NUL byte at the end, so read will always fail, but it will write to the variables anyway
+          IFS=$'\n' read -d '' -r workflow_id workflow_conclusion <<<"$(jq -r '.workflow_runs[0].id, .workflow_runs[0].conclusion' <<<$workflows_json)" || true
 
           if [[ "$workflow_conclusion" != "success" ]]; then
             echo 'Last workflow run is not successful.'
