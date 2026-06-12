@@ -53,6 +53,16 @@ namespace OTAPI
 
         static string GetVersion() => GetVersion(typeof(Common).Assembly);
 
+        static string GetVersionShort(string version)
+        {
+            var metadataIndex = version.IndexOf('+');
+            if (metadataIndex < 0)
+                return version;
+
+            var length = Math.Min(version.Length, metadataIndex + 1 + 7/* commit hash */);
+            return version[..length];
+        }
+
         /// <summary>
         /// Returns the current version string of OTAPI
         /// </summary>
@@ -61,7 +71,7 @@ namespace OTAPI
         /// <summary>
         /// Returns the current version string of OTAPI with a short hash name
         /// </summary>
-        public static readonly string VersionShort = Version[..(Version.IndexOf('+')+1 + 7/* commit hash */)];
+        public static readonly string VersionShort = GetVersionShort(Version);
 
         /// <summary>
         /// The file name(no ext.) of the file that was patched.
@@ -121,7 +131,7 @@ namespace OTAPI
             /// <summary>
             /// Returns the current version string of ModFramework with a short hash name
             /// </summary>
-            public static readonly string VersionShort = Version[..(Version.IndexOf('+')+1 + 7/* commit hash */)];
+            public static readonly string VersionShort = GetVersionShort(Version);
         }
     }
 }
