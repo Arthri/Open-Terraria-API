@@ -2,73 +2,44 @@ name: "CI-NuGet"
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push/pull events but only for the upcoming-nuget-release branch
-  push:
-    branches: [ upcoming-nuget-release ]
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+env:
+  PACKAGES_PATH: ${{ github.workspace }}/nuget-packages/
 
 jobs:
 
   Server:
-    runs-on: ubuntu-latest
-    environment: CI
-
-    strategy:
-      fail-fast: false
-      matrix:
-        profile: [
-          {
-            name: PC,
-            patch_target: p,
-            package_path: OTAPI.PC.nupkg,
-          },
-          # {
-          #   name: Mobile,
-          #   patch_target: m,
-          #   package_path: OTAPI.Mobile.nupkg,
-          # },
-          # {
-          #   name: tModLoader,
-          #   patch_target: t,
-          #   package_path: OTAPI.TML.nupkg,
-          # },
-        ]
-
-    name: ${{ matrix.profile.name }} Server
+    runs-on: ubuntu-26.04
+    environment: NuGet (Stable)
+    permissions:
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Build the project
+      - name: Get Run ID
+        id: get-run-id
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          dotnet build OTAPI.Mods.slnf
-          (cd OTAPI.Patcher/bin/Debug/net9.0 && exec dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net9.0)
-          dotnet build OTAPI.Server.Launcher.slnf
-          (cd OTAPI.Server.Launcher/bin/Debug/net9.0 && exec dotnet OTAPI.Server.Launcher.dll -test-init)
+          workflows_json="$(curl --fail-with-body -L \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2026-03-10' \
+              'https://api.github.com/repos/'"$GITHUB_REPOSITORY"'/actions/workflows/ci.yml/runs?branch=upcoming&per_page=1'
+          )"
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.profile.name }} NuGet Package
-          path: OTAPI.Patcher/bin/Debug/net9.0/${{ matrix.profile.package_path }}
+          workflow_id="$(jq '.workflow_runs[1].id' <<<$workflows_json)"
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.profile.name }} Binaries
-          path: |
-            OTAPI.Patcher/bin/Debug/net9.0/artifact-*/*
+          echo 'workflow-id='"$workflow_id" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8
         with:
-          name: ${{ matrix.profile.name }} Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net9.0/*.mfw.md
+          pattern: "* NuGet Package"
+          run-id: ${{ steps.get-run.id.outputs.workflow-id }}
+          path: ${{ env.PACKAGES_PATH }}
+          merge-multiple: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@v1
@@ -78,5 +49,5 @@ jobs:
 
       - name: "Releasing to NuGet: ${{ matrix.profile.name }}"
         env:
-          NUGET_API_KEY: ${{steps.login.outputs.NUGET_API_KEY}}
-        run: dotnet nuget push OTAPI.Patcher/bin/Debug/net9.0/${{ matrix.profile.package_path }} --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "$PACKAGES_PATH/"*.nupkg --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
