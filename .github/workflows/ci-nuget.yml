@@ -51,7 +51,7 @@ jobs:
         uses: NuGet/login@v1
         id: nuget-login
         with:
-          user: Arthri
+          user: DGSP
 
       - name: "Releasing to NuGet: ${{ matrix.profile.name }}"
         env:
