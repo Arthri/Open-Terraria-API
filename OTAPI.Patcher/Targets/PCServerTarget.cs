@@ -1,5 +1,6 @@
 ﻿using ModFramework;
 using ModFramework.Modules.CSharp;
+using Mono.Cecil;
 using MonoMod.Utils;
 using OTAPI.Patcher.Resolvers;
 using System;
@@ -221,7 +222,8 @@ public class PCServerTarget : IServerPatchTarget
                             mm.Module.GetType("Terraria.Wiring").CreateHooks(mm);
                             mm.Module.GetType("Terraria.GameContent.PressurePlateHelper").CreateHooks(mm);
                             mm.Module.GetType("Terraria.GameContent.CraftingRequests").CreateHooks(mm);
-                            Console.WriteLine("Done");
+                            var fixedParameterCount = ClearInvalidGeneratedHookParameterDefaults(mm);
+                            Console.WriteLine($"Done (cleared invalid defaults on {fixedParameterCount} generated hook parameters)");
                         }
                         else if (modType == ModType.Write)
                         {
@@ -252,6 +254,42 @@ public class PCServerTarget : IServerPatchTarget
         this.WriteCIArtifacts(ArtifactName);
 
         Console.WriteLine("Patching has completed.");
+    }
+
+    private static int ClearInvalidGeneratedHookParameterDefaults(ModFwModder modder)
+    {
+        var fixedParameterCount = 0;
+
+        foreach (var type in WalkTypes(modder.Module.Types))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.Name.StartsWith(HookEmitter.HookMethodNamePrefix, StringComparison.Ordinal))
+                    continue;
+
+                foreach (var parameter in method.Parameters)
+                {
+                    if ((parameter.IsOptional || parameter.HasDefault) && !parameter.HasConstant)
+                    {
+                        parameter.Attributes &= ~(Mono.Cecil.ParameterAttributes.Optional | Mono.Cecil.ParameterAttributes.HasDefault);
+                        fixedParameterCount++;
+                    }
+                }
+            }
+        }
+
+        return fixedParameterCount;
+    }
+
+    private static IEnumerable<TypeDefinition> WalkTypes(IEnumerable<TypeDefinition> types)
+    {
+        foreach (var type in types)
+        {
+            yield return type;
+
+            foreach (var nestedType in WalkTypes(type.NestedTypes))
+                yield return nestedType;
+        }
     }
 
     public virtual void AddSearchDirectories(ModFwModder modder) { }
